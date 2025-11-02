@@ -73,6 +73,7 @@ import ca.gosyer.appdirs.AppDirs
 import com.zoffcc.applications.undereat.Log
 import com.zoffcc.applications.undereat.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
+import com.zoffcc.applications.undereat.MainScreen
 import com.zoffcc.applications.undereat.PrefsSettings
 import com.zoffcc.applications.undereat.corefuncs
 import com.zoffcc.applications.undereat.createGlobalStore
@@ -152,8 +153,7 @@ fun App()
     ScaffoldCoroutineScope = rememberCoroutineScope()
     Theme {
         Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
-
-
+            MainScreen()
         }
     }
     corefuncs().init_me()

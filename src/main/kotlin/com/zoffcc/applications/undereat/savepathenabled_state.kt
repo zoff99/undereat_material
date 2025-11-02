@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection", "PropertyName", "ClassName")
+
 package com.zoffcc.applications.undereat
 
 import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
@@ -17,19 +19,20 @@ const val TAG = "trifa.GlobalStore"
 data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
     val mainwindow_focused: Boolean = true,
-    val contacts_unread_message_count: Int = 0,
-    val contacts_unread_group_message_count: Int = 0,
-    val firstRun: Boolean = false,
-    val peerListCollapse: Boolean = false,
-    val startupSelfname: String = "",
     val ui_scale: Float = 1.0f,
     val ui_density: Float = 1.0f,
     val default_density: Float = 1.0f,
-    val toxRunning: Boolean = false,
     val ormaRunning: Boolean = false,
-    val native_ffmpegav_lib_loaded: Boolean = false,
-    val native_notification_lib_loaded: Boolean = false,
-    val app_startup: Boolean = true
+    val app_startup: Boolean = true,
+    // -------------------
+    val mainscreen_state: MAINSCREEN = MAINSCREEN.MAINLIST,
+    val restaurantId: Long = -1,
+    val filterCategoryId: Long = -1,
+    val compactMainList: Boolean = false,
+    val forsummerFilter: Boolean = false,
+    val haveacFilter: Boolean = false,
+    val sorterId: Long = 0,
+    val filterString: String? = null
 )
 
 private val globalstore_state_lock = Any()
@@ -37,39 +40,36 @@ private val globalstore_state_lock = Any()
 interface GlobalStore {
     fun updateMinimized(value: Boolean)
     fun updateFocused(value: Boolean)
-    fun updateFirstRun(value: Boolean)
-    fun updateStartupSelfname(value: String)
     fun updateUiScale(value: Float)
-    fun updatePeerListCollapse(value: Boolean)
     fun updateUiDensity(value: Float)
     fun setDefaultDensity(value: Float)
     fun isMinimized(): Boolean
     fun isFocused(): Boolean
-    fun isFirstRun(): Boolean
-    fun getStartupSelfname(): String
     fun loadUiScale()
     fun getUiScale(): Float
-    fun isPeerListCollapse(): Boolean
     fun loadUiDensity()
     fun getUiDensity(): Float
-    fun setToxRunning(value: Boolean)
-    fun getToxRunning(): Boolean
-    fun setNative_ffmpegav_lib_loaded(value: Boolean)
-    fun getNative_ffmpegav_lib_loaded(): Boolean
     fun setApp_startup(value: Boolean)
     fun getApp_startup(): Boolean
-    fun setNative_notification_lib_loaded(value: Boolean)
-    fun getNative_notification_lib_loaded(): Boolean
     fun setOrmaRunning(value: Boolean)
     fun getOrmaRunning(): Boolean
-    fun increase_unread_message_count()
-    fun get_unread_message_count(): Int
-    fun try_clear_unread_message_count()
-    fun hard_clear_unread_message_count()
-    fun increase_unread_group_message_count()
-    fun get_unread_group_message_count(): Int
-    fun try_clear_unread_group_message_count()
-    fun hard_clear_unread_group_message_count()
+    // ------------------
+    fun setEditRestaurantId(value: Long)
+    fun setFilterCategoryId(value: Long)
+    fun setSorterId(value: Long)
+    fun setFilterString(value: String?)
+    fun setCompactMainList(value: Boolean)
+    fun setForsummerFilter(value: Boolean)
+    fun setHaveacFilter(value: Boolean)
+    fun updateMainscreenState(value: MAINSCREEN)
+    fun getMainscreenState(): MAINSCREEN
+    fun getRestaurantId(): Long
+    fun getFilterCategoryId(): Long
+    fun getSorterId(): Long
+    fun getFilterString(): String?
+    fun getCompactMainList(): Boolean
+    fun getForsummerFilter(): Boolean
+    fun getHaveacFilter(): Boolean
     val stateFlow: StateFlow<globalstore_state>
     val state get() = stateFlow.value
 }
@@ -89,21 +89,6 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun updateFocused(value: Boolean)
         {
             mutableStateFlow.value = state.copy(mainwindow_focused = value)
-        }
-
-        override fun updateFirstRun(value: Boolean)
-        {
-            mutableStateFlow.value = state.copy(firstRun = value)
-        }
-
-        override fun updatePeerListCollapse(value: Boolean)
-        {
-            mutableStateFlow.value = state.copy(peerListCollapse = value)
-        }
-
-        override fun updateStartupSelfname(value: String)
-        {
-            mutableStateFlow.value = state.copy(startupSelfname = value)
         }
 
         override fun updateUiScale(value: Float)
@@ -149,46 +134,6 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             return state.mainwindow_focused
         }
 
-        override fun isFirstRun(): Boolean
-        {
-            return state.firstRun
-        }
-
-        override fun isPeerListCollapse(): Boolean
-        {
-            return state.peerListCollapse
-        }
-
-        override fun getStartupSelfname(): String
-        {
-            return state.startupSelfname
-        }
-
-        override fun getToxRunning(): Boolean
-        {
-            return state.toxRunning
-        }
-
-        override fun setToxRunning(value: Boolean)
-        {
-            mutableStateFlow.value = state.copy(toxRunning = value)
-        }
-
-        override fun getNative_ffmpegav_lib_loaded(): Boolean
-        {
-            return state.native_ffmpegav_lib_loaded
-        }
-
-        override fun setNative_ffmpegav_lib_loaded(value: Boolean)
-        {
-            mutableStateFlow.value = state.copy(native_ffmpegav_lib_loaded = value)
-        }
-
-        override fun getNative_notification_lib_loaded(): Boolean
-        {
-            return state.native_notification_lib_loaded
-        }
-
         override fun setApp_startup(value: Boolean)
         {
             mutableStateFlow.value = state.copy(app_startup = value)
@@ -198,11 +143,6 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
         override fun getApp_startup(): Boolean
         {
             return state.app_startup
-        }
-
-        override fun setNative_notification_lib_loaded(value: Boolean)
-        {
-            mutableStateFlow.value = state.copy(native_notification_lib_loaded = value)
         }
 
         override fun getOrmaRunning(): Boolean
@@ -268,67 +208,84 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             return state.ui_density
         }
 
-        override fun increase_unread_message_count()
-        {
-            mutableStateFlow.value = state.copy(contacts_unread_message_count = (state.contacts_unread_message_count + 1))
+        override fun updateMainscreenState(value: MAINSCREEN) {
+            mutableStateFlow.value = state.copy(mainscreen_state = value)
         }
 
-        override fun get_unread_message_count(): Int
-        {
-            return state.contacts_unread_message_count
+        override fun setEditRestaurantId(value: Long) {
+            mutableStateFlow.value = state.copy(restaurantId = value)
         }
 
-        override fun try_clear_unread_message_count()
-        {
-            synchronized(globalstore_state_lock) {
-                var unread_count = 0
-                try
-                {
-                    if (state.ormaRunning)
-                    {
-                    }
-                } catch (e: Exception)
-                {
+        override fun setFilterCategoryId(value: Long) {
+            mutableStateFlow.value = state.copy(filterCategoryId = value)
+        }
+
+        override fun setSorterId(value: Long) {
+            Log.i(TAG, "setSorterId:value=" + value)
+            if (value == SORTER.DISTANCE.value) {
+                Log.i(TAG, "setSorterId:2")
+                try {
+                } catch(e: java.lang.Exception) {
                     e.printStackTrace()
                 }
-                mutableStateFlow.value = state.copy(contacts_unread_message_count = unread_count)
-            }
-        }
-
-        override fun hard_clear_unread_message_count()
-        {
-            mutableStateFlow.value = state.copy(contacts_unread_message_count = 0)
-        }
-
-        override fun increase_unread_group_message_count()
-        {
-            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = (state.contacts_unread_group_message_count + 1))
-        }
-
-        override fun get_unread_group_message_count(): Int
-        {
-            return state.contacts_unread_group_message_count
-        }
-
-        override fun try_clear_unread_group_message_count()
-        {
-            var unread_count = 0
-            try
-            {
-                if (state.ormaRunning)
-                {
+            } else {
+                try {
+                } catch(e: java.lang.Exception) {
+                    e.printStackTrace()
                 }
             }
-            catch (e: Exception)
-            {
-                e.printStackTrace()
-            }
-            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = unread_count)
+            mutableStateFlow.value = state.copy(sorterId = value)
         }
 
-        override fun hard_clear_unread_group_message_count()
+        override fun setFilterString(value: String?) {
+            mutableStateFlow.value = state.copy(filterString = value)
+        }
+
+        override fun setCompactMainList(value: Boolean) {
+            mutableStateFlow.value = state.copy(compactMainList = value)
+        }
+
+        override fun setForsummerFilter(value: Boolean) {
+            mutableStateFlow.value = state.copy(forsummerFilter = value)
+        }
+
+        override fun setHaveacFilter(value: Boolean) {
+            mutableStateFlow.value = state.copy(haveacFilter = value)
+        }
+
+        override fun getMainscreenState(): MAINSCREEN
         {
-            mutableStateFlow.value = state.copy(contacts_unread_group_message_count = 0)
+            return state.mainscreen_state
+        }
+
+        override fun getRestaurantId(): Long
+        {
+            return state.restaurantId
+        }
+
+        override fun getFilterCategoryId(): Long
+        {
+            return state.filterCategoryId
+        }
+
+        override fun getSorterId(): Long {
+            return state.sorterId
+        }
+
+        override fun getFilterString(): String? {
+            return state.filterString
+        }
+
+        override fun getCompactMainList(): Boolean {
+            return state.compactMainList
+        }
+
+        override fun getForsummerFilter(): Boolean {
+            return state.forsummerFilter
+        }
+
+        override fun getHaveacFilter(): Boolean {
+            return state.haveacFilter
         }
     }
 }
