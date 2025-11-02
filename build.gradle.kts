@@ -174,7 +174,7 @@ compose.desktop {
                 menuGroup = "Undereat Material"
                 // see https://wixtoolset.org/documentation/manual/v3/howtos/general/generate_guids.html
                 // and https://www.guidgen.com/
-                upgradeUuid = "7774da26-11dd-4ea4-bd08-a1550d25b620"
+                upgradeUuid = "6568ac85-3d27-48dc-a945-773bcdb694c4"
             }
             linux {
                 iconFile.set(iconsRoot.resolve("icon-linux.png"))
