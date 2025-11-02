@@ -1,7 +1,6 @@
 @file:Suppress("UNUSED_PARAMETER", "LocalVariableName", "PropertyName", "ClassName", "FunctionName", "unused", "UNUSED_VARIABLE", "SpellCheckingInspection", "UnnecessaryVariable", "ConvertToStringTemplate", "UNUSED_VALUE", "ReplaceCallWithBinaryOperator", "CascadeIf", "VARIABLE_WITH_REDUNDANT_INITIALIZER", "ControlFlowWithEmptyBody", "MemberVisibilityCanBePrivate", "ConstPropertyName", "ConstPropertyName", "ObjectPropertyName", "ReplaceJavaStaticMethodWithKotlinAnalog", "KotlinConstantConditions", "FoldInitializerAndIfToElvis", "SENSELESS_COMPARISON")
 package com.zoffcc.applications.undereat
 
-import SnackBarToast
 import androidx.compose.material.AlertDialog
 import androidx.compose.material.Button
 import androidx.compose.material.Text
@@ -9,20 +8,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
-import com.zoffcc.applications.trifa2.timestampMs
 import com.zoffcc.applications.undereat.HelperOSFile.open_webpage
 import com.zoffcc.applications.undereat.corefuncs.del_g_opts
 import com.zoffcc.applications.undereat.corefuncs.get_g_opts
 import com.zoffcc.applications.undereat.corefuncs.orma
 import com.zoffcc.applications.undereat.corefuncs.set_g_opts
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
-import global_prefs
 import globalstore
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 const val DEBUG_COMPOSE_UI_UPDATES = false // set "false" for release builds
@@ -128,11 +120,14 @@ fun MainScreen() {
     else if (state_mainscreen.mainscreen_state == MAINSCREEN.COMPASS)
     {
         // CompassScreen()
+        // HINT: no compass view on desktop
+        globalstore.setEditRestaurantId(-1)
+        main_list(restaurants)
     }
     else if (state_mainscreen.mainscreen_state == MAINSCREEN.ADD)
     {
-        // globalstore.setEditRestaurantId(-1)
-        // add_form()
+        globalstore.setEditRestaurantId(-1)
+        add_form(null)
     }
     else if (state_mainscreen.mainscreen_state == MAINSCREEN.SETTINGS)
     {
@@ -141,7 +136,7 @@ fun MainScreen() {
     }
     else if (state_mainscreen.mainscreen_state == MAINSCREEN.EDIT)
     {
-        // edit_form()
+        edit_form(null)
     }
 }
 

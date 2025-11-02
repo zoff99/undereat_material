@@ -1,7 +1,6 @@
 @file:Suppress("LiftReturnOrAssignment", "LocalVariableName", "UNUSED_PARAMETER",
     "SpellCheckingInspection", "ConvertToStringTemplate", "UsePropertyAccessSyntax",
-    "ReplaceWithOperatorAssignment", "unused", "KotlinConstantConditions"
-)
+    "ReplaceWithOperatorAssignment", "unused", "KotlinConstantConditions", "RemoveRedundantCallsOfConversionMethods", "ControlFlowWithEmptyBody")
 
 package com.zoffcc.applications.undereat
 
@@ -67,7 +66,6 @@ import com.zoffcc.applications.undereat.DateFormat2.Companion.format
 import globalstore
 import kotlinx.coroutines.flow.collectLatest
 import randomDebugBorder
-import java.net.URI
 import java.net.URLEncoder
 import kotlin.math.pow
 import kotlin.math.roundToInt
