@@ -1,12 +1,6 @@
 package com.zoffcc.applications.undereat
 
+// HINT: SORTER enum is now in Main.kt
+//       windows and macOS give some error otherwise
 
-enum class SORTER(val value: Long) {
-    NAME(0),
-    ADDRESS(1),
-    DISTANCE(2),
-    RATING(3),
-    ADDED_DATE(4),
-    MODIFIED_DATE(5)
-}
 
