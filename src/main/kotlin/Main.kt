@@ -141,11 +141,11 @@ fun App()
     ScaffoldCoroutineScope = rememberCoroutineScope()
     Theme {
         Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
-            Column() {
-            }
+
 
         }
     }
+    corefuncs().init_me(this)
 }
 
 @OptIn(DelicateCoroutinesApi::class)
