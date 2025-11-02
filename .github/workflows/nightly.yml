@@ -499,11 +499,7 @@ jobs:
            screencapture -T 25 -x -t png /Users/runner/screen05.png &
            screencapture -T 50 -x -t png /Users/runner/screen06.png &
            screencapture -T 60 -x -t png /Users/runner/screen07.png &
-           screencapture -T 90 -x -t png /Users/runner/screen09.png &
-           screencapture -T 110 -x -t png /Users/runner/screen10.png &
-           screencapture -T 248 -x -t png /Users/runner/screenshot-macos-15arm.png &
-           screencapture -T 240 -x -t png /Users/runner/screen12.png &
-           screencapture -T 300 -x -t png /Users/runner/screen13.png &
+           screencapture -T 80 -x -t png /Users/runner/screenshot-macos-15arm.png &
            pwd
            ls -al
            ./gradlew run > undereat.log 2>&1 &
@@ -518,6 +514,7 @@ jobs:
            sleep 20
            cliclick -m verbose c:367,623
            sleep 10
+           sleep 40
            pwd
            ls -al /Users/runner/
            cp -v /Users/runner/screenshot-macos-15arm.png /Users/runner/work/undereat_material/undereat_material/screenshot-macos-15arm.png
