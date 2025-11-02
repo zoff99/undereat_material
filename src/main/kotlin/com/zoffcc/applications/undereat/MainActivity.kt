@@ -2,11 +2,15 @@
 package com.zoffcc.applications.undereat
 
 import SnackBarToast
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.Button
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import com.zoffcc.applications.trifa2.timestampMs
+import com.zoffcc.applications.undereat.HelperOSFile.open_webpage
 import com.zoffcc.applications.undereat.corefuncs.del_g_opts
 import com.zoffcc.applications.undereat.corefuncs.get_g_opts
 import com.zoffcc.applications.undereat.corefuncs.orma
@@ -94,6 +98,18 @@ class MainActivity
             Log.i(TAG, "MainActivity:" + this)
         }
     }
+}
+
+internal fun restore_mainlist_state() {
+    load_taxi_number()
+    load_categories()
+    load_compact_flag()
+    load_filters()
+    load_sorter()
+    load_filter_string()
+    load_forsummer_flag()
+    load_haveac_flag()
+    load_restaurants()
 }
 
 val restaurantliststore = createRestaurantListStore()
@@ -294,3 +310,25 @@ private fun load_filter_string() {
     globalstore.setFilterString(id)
 }
 
+@Composable
+fun group_show_open_link_dialog(show_link_click: Boolean, link_str: String, setLinkVars: (Boolean, String) -> Unit)
+{
+    var show_link_click1 = show_link_click
+    var link_str1 = link_str
+    if (show_link_click1)
+    {
+        AlertDialog(onDismissRequest = { link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) },
+            title = { Text("Open this URL ?") },
+            confirmButton = {
+                Button(onClick = { open_webpage(link_str1); link_str1 = ""; show_link_click1 = false; setLinkVars(show_link_click1, link_str1) }) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                Button(onClick = { link_str1 = ""; show_link_click1 = false;setLinkVars(show_link_click1, link_str1) }) {
+                    Text("No")
+                }
+            },
+            text = { Text("This could be potentially dangerous!" + "\n\n" + link_str1) })
+    }
+}

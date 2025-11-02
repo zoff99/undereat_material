@@ -77,6 +77,7 @@ import com.zoffcc.applications.undereat.MainScreen
 import com.zoffcc.applications.undereat.PrefsSettings
 import com.zoffcc.applications.undereat.corefuncs
 import com.zoffcc.applications.undereat.createGlobalStore
+import com.zoffcc.applications.undereat.restore_mainlist_state
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -157,6 +158,7 @@ fun App()
         }
     }
     corefuncs().init_me()
+    restore_mainlist_state()
 }
 
 @OptIn(DelicateCoroutinesApi::class)

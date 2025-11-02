@@ -5,6 +5,7 @@
 
 package com.zoffcc.applications.undereat
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -26,15 +28,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -57,6 +57,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
@@ -70,7 +71,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.zoffcc.applications.sorm.Category
-import com.zoffcc.applications.sorm.Restaurant
 import com.zoffcc.applications.undereat.corefuncs.DEMO_SHOWCASE_DEBUG_ONLY
 import com.zoffcc.applications.undereat.corefuncs.SpecialCategory.SPECIAL_CATEGORY_ALL
 import com.zoffcc.applications.undereat.corefuncs.SpecialCategory.SPECIAL_CATEGORY_NOSTORE
@@ -592,27 +592,20 @@ fun main_list(restaurants: StateRestaurantList) {
         }
 
         // Data list ----------------------
-        LazyColumn(
-            state = listState,
-            modifier = Modifier
-                .fillMaxHeight()
-                .fillMaxWidth()
-                .padding(start = 2.dp, end = 10.dp)
-                .randomDebugBorder(),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            items(
-                items = restaurants.restaurantlist,
-                key = { item -> item.id },
-                contentType = { item -> item::class }
-            ) { item ->
-                Text(item.name + " " + item.address,
-                    fontSize = 18.sp)
+        Box(Modifier.fillMaxSize()) {
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxHeight().fillMaxWidth().padding(start = 2.dp, end = 10.dp).randomDebugBorder(),
+                verticalArrangement = Arrangement.spacedBy(0.dp),
+            ) {
+                items(items = restaurants.restaurantlist, key = { item -> item.id }, contentType = { item -> item::class }) { data ->
+                    RestaurantCard(-999, data, null)
+                }
             }
-            //itemsIndexed(
-            //    items = restaurants.restaurantlist,
-            //    key = { index, item -> item.id }
-            //)
+            VerticalScrollbar(adapter = rememberScrollbarAdapter(listState),
+                modifier = Modifier.fillMaxHeight().
+                align(CenterEnd).
+                width(10.dp))
         }
         // Data list ----------------------
     }
