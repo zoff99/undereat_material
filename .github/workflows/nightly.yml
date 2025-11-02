@@ -492,7 +492,6 @@ jobs:
            export JAVA_HOME=$(/usr/libexec/java_home -v17)
            sed -i -e 's#DEMO_SHOWCASE_DEBUG_ONLY = false#DEMO_SHOWCASE_DEBUG_ONLY = true#' ./src/main/java/com/zoffcc/applications/undereat/corefuncs.java
            ./gradlew assemble
-           cliclick -m verbose m:12,34
            screencapture -T 1 -x -t png /Users/runner/screen01.png &
            screencapture -T 2 -x -t png /Users/runner/screen02.png &
            screencapture -T 3 -x -t png /Users/runner/screen03.png &
@@ -513,7 +512,6 @@ jobs:
            javac jshowarch.java
            java jshowarch 885 76 165 110 15 1 &
            sleep 20
-           cliclick -m verbose c:367,623
            sleep 10
            sleep 40
            pwd
