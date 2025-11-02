@@ -509,18 +509,15 @@ jobs:
            ./gradlew run > undereat.log 2>&1 &
            pwd
            sleep 45
-           sleep 15
-           sleep 20
            cat /Users/runner/work/undereat_material/undereat_material/undereat.log
            sendkeys apps
            cd /Users/runner/work/undereat_material/undereat_material/jshowarch-master
            rm *.class
            javac jshowarch.java
            java jshowarch 885 76 165 110 15 1 &
-           sleep 90
+           sleep 20
            cliclick -m verbose c:367,623
-           sleep 120
-           cat /Users/runner/work/undereat_material/undereat_material/tester.log
+           sleep 10
            pwd
            ls -al /Users/runner/
            cp -v /Users/runner/screenshot-macos-15arm.png /Users/runner/work/undereat_material/undereat_material/screenshot-macos-15arm.png
@@ -688,7 +685,6 @@ jobs:
                cat /home/runner/work/undereat_material/undereat_material/undereat.log||echo "NO ERR"
                echo "++++++++++++++++++"
                echo "++++++++++++++++++"
-               cat /home/runner/work/undereat_material/undereat_material/tester.log||echo "NO ERR"
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
 
         - name: upload-screenshots
