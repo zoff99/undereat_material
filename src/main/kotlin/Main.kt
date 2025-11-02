@@ -5,7 +5,6 @@ import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -73,7 +72,9 @@ import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.zoffcc.applications.undereat.Log
 import com.zoffcc.applications.undereat.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
+import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
 import com.zoffcc.applications.undereat.PrefsSettings
+import com.zoffcc.applications.undereat.corefuncs
 import com.zoffcc.applications.undereat.createGlobalStore
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
 import kotlinx.coroutines.CoroutineScope
@@ -114,6 +115,16 @@ fun App()
 {
     println("User data dir: " + APPDIRS.getUserDataDir())
     println("User data dir (roaming): " + APPDIRS.getUserDataDir(roaming = true))
+    PREF__database_files_dir = APPDIRS.getUserDataDir(roaming = true)
+    try
+    {
+        val dir_file = File(PREF__database_files_dir)
+        dir_file.mkdirs()
+    }
+    catch(e: Exception)
+    {
+        Log.i(TAG, "error creating savefile directory and parents: " + PREF__database_files_dir)
+    }
     println("User config dir: " + APPDIRS.getUserConfigDir())
     println("User config dir (roaming): " + APPDIRS.getUserConfigDir(roaming = true))
     println("User cache dir: " + APPDIRS.getUserCacheDir())
@@ -145,7 +156,7 @@ fun App()
 
         }
     }
-    corefuncs().init_me(this)
+    corefuncs().init_me()
 }
 
 @OptIn(DelicateCoroutinesApi::class)
