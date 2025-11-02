@@ -85,10 +85,16 @@ fun RestaurantCard(index: Int, data: Restaurant, context: Object?) {
                 shape = RectangleShape
             )
             .clickable {
+                // HINT: we use the restaurant item for edit clicking
+                // no compass view on desktop
+                globalstore.setEditRestaurantId(data.id)
+                globalstore.updateMainscreenState(MAINSCREEN.EDIT)
+                /*
                 if (globalstore.getSorterId() == SORTER.DISTANCE.value) {
                     globalstore.setEditRestaurantId(data.id)
                     globalstore.updateMainscreenState(MAINSCREEN.COMPASS)
                 }
+                 */
             }
         ,
     ) {

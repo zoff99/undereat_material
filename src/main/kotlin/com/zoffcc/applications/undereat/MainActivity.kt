@@ -133,6 +133,9 @@ fun MainScreen() {
     {
         // globalstore.setEditRestaurantId(-1)
         // settings_form()
+        // HINT: !!no settings view for now!!
+        globalstore.setEditRestaurantId(-1)
+        main_list(restaurants)
     }
     else if (state_mainscreen.mainscreen_state == MAINSCREEN.EDIT)
     {
