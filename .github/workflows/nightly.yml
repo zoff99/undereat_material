@@ -490,6 +490,7 @@ jobs:
            _HOME_="/Users/runner/"
            /usr/libexec/java_home -v 17
            export JAVA_HOME=$(/usr/libexec/java_home -v17)
+           sed -i -e 's#DEMO_SHOWCASE_DEBUG_ONLY = false#DEMO_SHOWCASE_DEBUG_ONLY = true#' ./src/main/java/com/zoffcc/applications/undereat/corefuncs.java
            ./gradlew assemble
            cliclick -m verbose m:12,34
            screencapture -T 1 -x -t png /Users/runner/screen01.png &
@@ -673,6 +674,7 @@ jobs:
                pwd
                ls -al
                export LC_ALL=zh_CN.utf8
+               sed -i -e 's#DEMO_SHOWCASE_DEBUG_ONLY = false#DEMO_SHOWCASE_DEBUG_ONLY = true#' ./src/main/java/com/zoffcc/applications/undereat/corefuncs.java
                ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
                xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
                echo "++++++++++++++++++"
