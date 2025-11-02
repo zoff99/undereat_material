@@ -3,12 +3,14 @@
 
 package com.zoffcc.applications.undereat
 
+import androidx.compose.foundation.VerticalScrollbar
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,6 +18,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -40,6 +43,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterEnd
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
@@ -47,8 +51,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.gson.Gson
-import com.google.gson.JsonArray
 import com.google.gson.JsonParser
 import com.zoffcc.applications.sorm.Restaurant
 import com.zoffcc.applications.undereat.corefuncs.orma
@@ -98,349 +100,208 @@ fun add_form(context: Object?) {
     val cat_itemPosition = remember { mutableIntStateOf(0) }
     val scrollState = rememberScrollState()
 
-    Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState))
-    {
-        Spacer(modifier = Modifier.height(20.dp))
-        Text("Add new Restaurant", fontSize = 14.sp)
-        Spacer(modifier = Modifier.height(20.dp))
-        Column {
-            //
-            //
-            // ----------- name -----------
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_name, placeholder = { Text(text = "Name", fontSize = 14.sp) },
-                onValueChange = { input_name = it })
-            // ----------- name -----------
-            //
-            //
-            // ----------- address -----------
-            Spacer(
-                modifier = Modifier
-                    .width(5.dp)
-                    .height(6.dp)
-            )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                Button(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .padding(horizontal = 5.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    elevation = ButtonDefaults.buttonElevation(4.dp),
-                    onClick = {
-                        if ((!input_name.text.isNullOrEmpty()) && (input_addr.text.isNullOrEmpty())) {
-                            get_address(search_item = input_name.text,
-                                onResult = {
-                                    if (it.isNullOrEmpty()) {
-                                        // Toast.makeText(context, "No Address Found", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        input_addr = TextFieldValue(text = it)
-                                    }
-                                })
-                        } else {
-                            //Toast.makeText(context, "No Name entered or Address Field is already filled out", Toast.LENGTH_SHORT).show()
+    Box(Modifier.fillMaxSize()) {
+        Column(modifier = Modifier.fillMaxSize().verticalScroll(scrollState)) {
+            Spacer(modifier = Modifier.height(20.dp))
+            Text("Add new Restaurant", fontSize = 14.sp)
+            Spacer(modifier = Modifier.height(20.dp))
+            Column { //
+                //
+                // ----------- name -----------
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_name, placeholder = { Text(text = "Name", fontSize = 14.sp) }, onValueChange = { input_name = it }) // ----------- name -----------
+                //
+                //
+                // ----------- address -----------
+                Spacer(modifier = Modifier.width(5.dp).height(6.dp))
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    Button(modifier = Modifier.height(40.dp).padding(horizontal = 5.dp), shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(4.dp), onClick = {
+                        if ((!input_name.text.isNullOrEmpty()) && (input_addr.text.isNullOrEmpty()))
+                        {
+                            get_address(search_item = input_name.text, onResult = {
+                                if (it.isNullOrEmpty())
+                                { // Toast.makeText(context, "No Address Found", Toast.LENGTH_SHORT).show()
+                                } else
+                                {
+                                    input_addr = TextFieldValue(text = it)
+                                }
+                            })
+                        } else
+                        { //Toast.makeText(context, "No Name entered or Address Field is already filled out", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    content = {
-                        Text(
-                            modifier = Modifier.padding(0.dp),
-                            text = "fill address with Nominatim",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                            )
-                        )
-                    }
-                )
-            }
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_addr, placeholder = { Text(text = "Address", fontSize = 14.sp) },
-                onValueChange = { input_addr = it })
-            // ----------- address -----------
-            //
-            //
-            // ----------- phone number -----------
-            Spacer(
-                modifier = Modifier
-                    .width(5.dp)
-                    .height(6.dp)
-            )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                Button(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .padding(horizontal = 5.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    elevation = ButtonDefaults.buttonElevation(4.dp),
-                    onClick = {
-                        if ((!input_name.text.isNullOrEmpty()) && (input_phonenumber.text.isNullOrEmpty())) {
-                            get_phonenumber(search_item = input_name.text,
-                                onResult = {
-                                    if (it.isNullOrEmpty()) {
-                                        //Toast.makeText(context, "No Phonenumber Found", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        input_phonenumber = TextFieldValue(text = it)
-                                    }
-                                })
-                        } else {
-                            //Toast.makeText(context, "No Name entered or Phonenumber is already filled out", Toast.LENGTH_SHORT).show()
-                        }
-                    },
-                    content = {
-                        Text(
-                            modifier = Modifier.padding(0.dp),
-                            text = "fill phonenumber with Nominatim",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                            )
-                        )
-                    }
-                )
-            }
-
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_phonenumber, placeholder = { Text(text = "Phone Number", fontSize = 14.sp) },
-                onValueChange = { input_phonenumber = it })
-            // ----------- phone number -----------
-            //
-            //
-            // ----------- category -----------
-            Box {
-                Row(
-                    horizontalArrangement = Arrangement.Start,
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .randomDebugBorder()
-                        .fillMaxWidth()
-                        .height(60.dp)
-                        .padding(10.dp)
-                        .clickable {
-                            cat_isDropDownExpanded.value = true
-                        }
-                ) {
-                    Text(text = cat_list[cat_itemPosition.intValue].name, fontSize = 16.sp)
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = "select Category")
+                    }, content = {
+                        Text(modifier = Modifier.padding(0.dp), text = "fill address with Nominatim", style = TextStyle(
+                            fontSize = 12.sp,
+                        ))
+                    })
                 }
-                DropdownMenu(
-                    expanded = cat_isDropDownExpanded.value,
-                    onDismissRequest = {
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_addr, placeholder = { Text(text = "Address", fontSize = 14.sp) }, onValueChange = { input_addr = it }) // ----------- address -----------
+                //
+                //
+                // ----------- phone number -----------
+                Spacer(modifier = Modifier.width(5.dp).height(6.dp))
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    Button(modifier = Modifier.height(40.dp).padding(horizontal = 5.dp), shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(4.dp), onClick = {
+                        if ((!input_name.text.isNullOrEmpty()) && (input_phonenumber.text.isNullOrEmpty()))
+                        {
+                            get_phonenumber(search_item = input_name.text, onResult = {
+                                if (it.isNullOrEmpty())
+                                { //Toast.makeText(context, "No Phonenumber Found", Toast.LENGTH_SHORT).show()
+                                } else
+                                {
+                                    input_phonenumber = TextFieldValue(text = it)
+                                }
+                            })
+                        } else
+                        { //Toast.makeText(context, "No Name entered or Phonenumber is already filled out", Toast.LENGTH_SHORT).show()
+                        }
+                    }, content = {
+                        Text(modifier = Modifier.padding(0.dp), text = "fill phonenumber with Nominatim", style = TextStyle(
+                            fontSize = 12.sp,
+                        ))
+                    })
+                }
+
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_phonenumber, placeholder = { Text(text = "Phone Number", fontSize = 14.sp) }, onValueChange = { input_phonenumber = it }) // ----------- phone number -----------
+                //
+                //
+                // ----------- category -----------
+                Box {
+                    Row(horizontalArrangement = Arrangement.Start, verticalAlignment = Alignment.CenterVertically, modifier = Modifier.randomDebugBorder().fillMaxWidth().height(60.dp).padding(10.dp).clickable {
+                            cat_isDropDownExpanded.value = true
+                        }) {
+                        Text(text = cat_list[cat_itemPosition.intValue].name, fontSize = 16.sp)
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = "select Category")
+                    }
+                    DropdownMenu(expanded = cat_isDropDownExpanded.value, onDismissRequest = {
                         cat_isDropDownExpanded.value = false
                     }) {
-                    cat_list.forEachIndexed { index, category_ ->
-                        DropdownMenuItem(
-                            modifier = Modifier
-                                .height(60.dp)
-                                .padding(1.dp),
-                            text = {
+                        cat_list.forEachIndexed { index, category_ ->
+                            DropdownMenuItem(modifier = Modifier.height(60.dp).padding(1.dp), text = {
                                 Text(text = category_.name, fontSize = 16.sp)
-                            },
-                            onClick = {
+                            }, onClick = {
                                 cat_isDropDownExpanded.value = false
                                 cat_itemPosition.intValue = index
                             })
-                    }
-                }
-            }
-            // ----------- category -----------
-            //
-            //
-            // ----------- for summer label -----------
-            Row {
-                Text(text = "ok for summer",
-                    modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically)
-                )
-                Checkbox(
-                    checked = input_for_summer,
-                    onCheckedChange = { input_for_summer = it },
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterVertically),
-                    enabled = true
-                )
-            }
-            // ----------- for summer label -----------
-            //
-            //
-            // ----------- have ac label -----------
-            Row {
-                Text(text = "has A/C",
-                    modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically)
-                )
-                Checkbox(
-                    checked = input_have_ac,
-                    onCheckedChange = { input_have_ac = it },
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterVertically),
-                    enabled = true
-                )
-            }
-            // ----------- have ac label -----------
-            //
-            //
-            // ----------- only evening label -----------
-            Row {
-                Text(text = "opens only evening",
-                    modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically)
-                )
-                Checkbox(
-                    checked = input_only_evening,
-                    onCheckedChange = { input_only_evening = it },
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterVertically),
-                    enabled = true
-                )
-            }
-            // ----------- only_evening label -----------
-            //
-            //
-            // ----------- need reservation -----------
-            Row {
-                Text(text = "needs reservation",
-                    modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically)
-                )
-                Checkbox(
-                    checked = input_needs_reservation,
-                    onCheckedChange = { input_needs_reservation = it },
-                    modifier = Modifier.size(60.dp).align(Alignment.CenterVertically),
-                    enabled = true
-                )
-            }
-            // ----------- need reservation -----------
-            //
-            //
-            // ----------- comment -----------
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_comment, placeholder = { Text(text = "Comment", fontSize = 14.sp) },
-                onValueChange = { input_comment = it })
-            // ----------- comment -----------
-            //
-            //
-            // --------- lat lon ---------
-            Spacer(
-                modifier = Modifier
-                    .width(5.dp)
-                    .height(6.dp)
-            )
-            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
-                Button(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .padding(horizontal = 5.dp),
-                    shape = RoundedCornerShape(10.dp),
-                    elevation = ButtonDefaults.buttonElevation(4.dp),
-                    onClick = {
-                        if ((!input_name.text.isNullOrEmpty()) && (input_lat.text.isNullOrEmpty()) && (input_lon.text.isNullOrEmpty())) {
-                            get_lat_lon(search_item = input_name.text,
-                                onResult = {
-                                    if ((it == null) || (it.lat.isNullOrEmpty()) || (it.lon.isNullOrEmpty())) {
-                                        // Toast.makeText(context, "No GPS Coordinates Found", Toast.LENGTH_SHORT).show()
-                                    } else {
-                                        input_lat = TextFieldValue(text = it.lat)
-                                        input_lon = TextFieldValue(text = it.lon)
-                                    }
-                                })
-                        } else {
-                            //Toast.makeText(context, "No Name entered or GPS Coordinates are already filled out", Toast.LENGTH_SHORT).show()
                         }
-                    },
-                    content = {
-                        Text(
-                            modifier = Modifier.padding(0.dp),
-                            text = "fill location with Nominatim",
-                            style = TextStyle(
-                                fontSize = 12.sp,
-                            )
-                        )
                     }
-                )
-            }
+                } // ----------- category -----------
+                //
+                //
+                // ----------- for summer label -----------
+                Row {
+                    Text(text = "ok for summer", modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically))
+                    Checkbox(checked = input_for_summer, onCheckedChange = { input_for_summer = it }, modifier = Modifier.size(60.dp).align(Alignment.CenterVertically), enabled = true)
+                } // ----------- for summer label -----------
+                //
+                //
+                // ----------- have ac label -----------
+                Row {
+                    Text(text = "has A/C", modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically))
+                    Checkbox(checked = input_have_ac, onCheckedChange = { input_have_ac = it }, modifier = Modifier.size(60.dp).align(Alignment.CenterVertically), enabled = true)
+                } // ----------- have ac label -----------
+                //
+                //
+                // ----------- only evening label -----------
+                Row {
+                    Text(text = "opens only evening", modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically))
+                    Checkbox(checked = input_only_evening, onCheckedChange = { input_only_evening = it }, modifier = Modifier.size(60.dp).align(Alignment.CenterVertically), enabled = true)
+                } // ----------- only_evening label -----------
+                //
+                //
+                // ----------- need reservation -----------
+                Row {
+                    Text(text = "needs reservation", modifier = Modifier.padding(start = 12.dp, end = 5.dp).align(Alignment.CenterVertically))
+                    Checkbox(checked = input_needs_reservation, onCheckedChange = { input_needs_reservation = it }, modifier = Modifier.size(60.dp).align(Alignment.CenterVertically), enabled = true)
+                } // ----------- need reservation -----------
+                //
+                //
+                // ----------- comment -----------
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_comment, placeholder = { Text(text = "Comment", fontSize = 14.sp) }, onValueChange = { input_comment = it }) // ----------- comment -----------
+                //
+                //
+                // --------- lat lon ---------
+                Spacer(modifier = Modifier.width(5.dp).height(6.dp))
+                CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
+                    Button(modifier = Modifier.height(40.dp).padding(horizontal = 5.dp), shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(4.dp), onClick = {
+                        if ((!input_name.text.isNullOrEmpty()) && (input_lat.text.isNullOrEmpty()) && (input_lon.text.isNullOrEmpty()))
+                        {
+                            get_lat_lon(search_item = input_name.text, onResult = {
+                                if ((it == null) || (it.lat.isNullOrEmpty()) || (it.lon.isNullOrEmpty()))
+                                { // Toast.makeText(context, "No GPS Coordinates Found", Toast.LENGTH_SHORT).show()
+                                } else
+                                {
+                                    input_lat = TextFieldValue(text = it.lat)
+                                    input_lon = TextFieldValue(text = it.lon)
+                                }
+                            })
+                        } else
+                        { //Toast.makeText(context, "No Name entered or GPS Coordinates are already filled out", Toast.LENGTH_SHORT).show()
+                        }
+                    }, content = {
+                        Text(modifier = Modifier.padding(0.dp), text = "fill location with Nominatim", style = TextStyle(
+                            fontSize = 12.sp,
+                        ))
+                    })
+                }
 
-            Spacer(modifier = Modifier.width(1.dp).height(10.dp))
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_lat, placeholder = { Text(text = "Latitude", fontSize = 14.sp) },
-                onValueChange = { input_lat = it })
-            TextField(modifier = Modifier
-                .fillMaxWidth()
-                .padding(3.dp),
-                value = input_lon, placeholder = { Text(text = "Longitude", fontSize = 14.sp) },
-                onValueChange = { input_lon = it })
+                Spacer(modifier = Modifier.width(1.dp).height(10.dp))
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_lat, placeholder = { Text(text = "Latitude", fontSize = 14.sp) }, onValueChange = { input_lat = it })
+                TextField(modifier = Modifier.fillMaxWidth().padding(3.dp), value = input_lon, placeholder = { Text(text = "Longitude", fontSize = 14.sp) }, onValueChange = { input_lon = it })
+                var show_link_click by remember { mutableStateOf(false) }
+                var link_str by remember { mutableStateOf("") }
+                group_show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
+                    show_link_click = show_link_click_
+                    link_str = link_str_
+                }
 
-            var show_link_click by remember { mutableStateOf(false) }
-            var link_str by remember { mutableStateOf("") }
-            group_show_open_link_dialog(show_link_click, link_str) { show_link_click_, link_str_ ->
-                show_link_click = show_link_click_
-                link_str = link_str_
-            }
-
-            IconButton(
-                onClick = {
-                    try {
-                        // Log.i(TAG, "GPS:"+ input_lat.text + " " + input_lon.text)
-                        if ((!input_lat.text.isNullOrEmpty()) && (!input_lon.text.isNullOrEmpty())) {
+                IconButton(onClick = {
+                    try
+                    { // Log.i(TAG, "GPS:"+ input_lat.text + " " + input_lon.text)
+                        if ((!input_lat.text.isNullOrEmpty()) && (!input_lon.text.isNullOrEmpty()))
+                        {
                             show_link_click = true
                             val mapurl_params = "" + input_lat.text + " " + input_lon.text
-                            val mapurl_encoded = "https://maps.google.com/?q=" +
-                                    URLEncoder.encode(mapurl_params, "UTF-8")
+                            val mapurl_encoded = "https://maps.google.com/?q=" + URLEncoder.encode(mapurl_params, "UTF-8")
                             link_str = mapurl_encoded
                         }
-                    }
-                    catch(e: Exception) {
+                    } catch (e: Exception)
+                    {
                         e.printStackTrace()
                     }
-                },
-                modifier = Modifier
-                    .randomDebugBorder()
-                    .padding(top = 10.dp)
-                    .size(60.dp)
-            ) {
-                Icon(
-                    modifier = Modifier
-                        .randomDebugBorder()
-                        .fillMaxSize()
-                        .padding(4.dp),
-                    imageVector = Icons.Default.LocationOn,
-                    tint = Color.LightGray,
-                    contentDescription = "Restaurant GPS Location"
-                )
+                }, modifier = Modifier.randomDebugBorder().padding(top = 10.dp).size(60.dp)) {
+                    Icon(modifier = Modifier.randomDebugBorder().fillMaxSize().padding(4.dp), imageVector = Icons.Default.LocationOn, tint = Color.LightGray, contentDescription = "Restaurant GPS Location")
+                } // --------- lat lon ---------
+                //
+                //
             }
-            // --------- lat lon ---------
-            //
-            //
-
-        }
-        Spacer(modifier = Modifier.height(20.dp))
-        Row {
-            //
-            //
-            // ------- button add -------
-            Button(
-                modifier = Modifier
-                    .height(50.dp)
-                    .padding(horizontal = 15.dp),
-                shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(4.dp),
-                onClick = {
-                    try {
-                        if (input_name.text.isNullOrEmpty()) {
-                            // input error
-                        } else if (input_addr.text.isNullOrEmpty()) {
-                            // input error
-                        } else {
+            Spacer(modifier = Modifier.height(20.dp))
+            Row { //
+                //
+                // ------- button add -------
+                Button(modifier = Modifier.height(50.dp).padding(horizontal = 15.dp), shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(4.dp), onClick = {
+                    try
+                    {
+                        if (input_name.text.isNullOrEmpty())
+                        { // input error
+                        } else if (input_addr.text.isNullOrEmpty())
+                        { // input error
+                        } else
+                        {
                             val r = Restaurant()
                             r.name = input_name.text
                             r.address = input_addr.text
-                            if (input_comment.text.isNullOrEmpty()) {
+                            if (input_comment.text.isNullOrEmpty())
+                            {
                                 r.comment = ""
-                            } else {
+                            } else
+                            {
                                 r.comment = input_comment.text
                             }
-                            if (input_phonenumber.text.isNullOrEmpty()) {
+                            if (input_phonenumber.text.isNullOrEmpty())
+                            {
                                 r.phonenumber = ""
-                            } else {
+                            } else
+                            {
                                 r.phonenumber = input_phonenumber.text
                             }
                             r.active = true
@@ -458,50 +319,32 @@ fun add_form(context: Object?) {
                             restore_mainlist_state()
                             globalstore.updateMainscreenState(MAINSCREEN.MAINLIST)
                         }
-                    } catch (e: Exception) {
+                    } catch (e: Exception)
+                    {
                         e.printStackTrace()
                     }
-                },
-                content = {
-                    Text(
-                        text = "Add",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                        )
-                    )
-                }
-            )
-            Spacer(
-                modifier = Modifier
-                    .width(50.dp)
-                    .weight(10F)
-            )
-            // ------- button add -------
-            //
-            //
-            // ------- button cancel -------
-            Button(
-                modifier = Modifier
-                    .height(50.dp)
-                    .padding(horizontal = 15.dp),
-                shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(4.dp),
-                onClick = {
+                }, content = {
+                    Text(text = "Add", style = TextStyle(
+                        fontSize = 15.sp,
+                    ))
+                })
+                Spacer(modifier = Modifier.width(50.dp).weight(10F)) // ------- button add -------
+                //
+                //
+                // ------- button cancel -------
+                Button(modifier = Modifier.height(50.dp).padding(horizontal = 15.dp), shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(4.dp), onClick = {
                     globalstore.updateMainscreenState(MAINSCREEN.MAINLIST)
-                },
-                content = {
-                    Text(
-                        text = "Cancel",
-                        style = TextStyle(
-                            fontSize = 15.sp,
-                        )
-                    )
-                }
-            )
-            // ------- button cancel -------
-            //
-            //
+                }, content = {
+                    Text(text = "Cancel", style = TextStyle(
+                        fontSize = 15.sp,
+                    ))
+                }) // ------- button cancel -------
+                //
+                //
+            }
         }
+        VerticalScrollbar(adapter = rememberScrollbarAdapter(scrollState),
+            modifier = Modifier.fillMaxHeight().align(CenterEnd).width(10.dp))
     }
 }
 
