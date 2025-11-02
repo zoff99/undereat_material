@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Undereat Material
+GenericName=Restaurant List
+StartupWMClass=normal_undereat_material
+Comment=Undereat
+Exec=undereat_material/bin/undereat_material
+Icon=undereat_material
+Terminal=false
+Type=Application
+Categories=Network;
