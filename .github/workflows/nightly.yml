@@ -1,0 +1,720 @@
+name: Nightly
+
+on:
+  push:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  pull_request:
+    paths-ignore:
+     - 'README.md'
+     - 'CHANGELOG.md'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: dummy
+        default: dummy
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  update-nightly-tag:
+    name: Update nightly release tag
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    permissions:
+        contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - name: Move nightly tag to head for nightly release
+        run: git tag -f nightly && git push origin nightly -f
+
+  build-linux-nightly-artifact:
+    name: Nightly Artifact Linux Build
+    runs-on: ubuntu-22.04
+    needs: [update-nightly-tag]
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          rpm \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: set java version
+        run:  sudo update-java-alternatives -s java-1.17.0-openjdk-amd64
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: build package
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseDistributionForCurrentOS
+      - name: build jar
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageReleaseUberJarForCurrentOS
+
+      - name: check jar
+        run:  id;pwd;ls -hal ./build/compose/jars/undereat_material-linux-x64-*.jar
+
+      - name: check deb
+        run:  id;pwd;ls -hal ./build/compose/binaries/main*/deb/undereat-material_*-1_amd64.deb
+
+      - name: check rpm
+        run:  id;pwd;ls -hal ./build/compose/binaries/main*/rpm/undereat_material-*.x86_64.rpm
+
+
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp -v ./build/compose/binaries/main*/deb/undereat-material_*_amd64.deb undereat-material_nightly.deb
+          cp -v ./build/compose/binaries/main*/rpm/undereat_material-*.x86_64.rpm undereat-material_nightly.rpm
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly.deb
+          path: undereat-material_nightly.deb
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly.rpm
+          path: undereat-material_nightly.rpm
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./build/compose/binaries/main*/deb/undereat-material_*_amd64.deb undereat-material.deb
+          cp -v ./build/compose/binaries/main*/rpm/undereat_material-*.x86_64.rpm undereat-material.rpm
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material.deb,undereat-material.rpm"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material_nightly.deb,undereat-material_nightly.rpm"
+
+
+
+
+  build-appimage-nightly-artifact:
+    name: Nightly Artifact AppImage Build
+    runs-on: ubuntu-22.04
+    needs: [update-nightly-tag]
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          wget \
+          rpm \
+          sed \
+          libfuse2 \
+          openjdk-17-jdk \
+          openjdk-17-jdk-headless
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: set java version
+        run:  sudo update-java-alternatives -s java-1.17.0-openjdk-amd64
+
+      - name: show java version
+        run:  type -a java;java -version
+
+      - name: activate appimage package creation
+        run: |
+          sed -i -e 's#TargetFormat.Dmg#TargetFormat.AppImage#' build.gradle.kts
+
+      - name: build package
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 packageAppImage
+
+      - name: make appimage
+        run:  id;pwd;ls -al;./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64 executeAppImageBuilder
+
+      - name: check appimage
+        run:  id;pwd;ls -hal ./undereat*material*AppImage
+
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp -v ./undereat*material*AppImage undereat-material_nightly-x86_64.appimage
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly-x86_64.appimage
+          path: undereat-material_nightly-x86_64.appimage
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./undereat*material*AppImage undereat-material-x86_64.appimage
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material-x86_64.appimage"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material_nightly-x86_64.appimage"
+
+  build-macos-nightly-artifact:
+    name: Nightly Artifact macOS Build
+    runs-on: macos-13
+    needs: [update-nightly-tag]
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: show architecture
+        run:  uname -m
+
+      - name: Install Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: |
+            11
+            17
+
+      - name: test java1
+        run:  |
+              type java
+              java -version || exit 0
+              /usr/libexec/java_home -V
+              /usr/libexec/java_home -v 17
+              export JAVA_HOME=$(/usr/libexec/java_home -v17)
+              java -version
+              $JAVA_HOME/bin/java -version
+              $JAVA_HOME/bin/javac -version
+              ls -al /usr/local/Cellar/openjdk/
+      - name: build package
+        run:  |
+          ls -al
+          id
+          pwd
+          ./gradlew packageReleaseDistributionForCurrentOS || cat /Users/runner/work/undereat_material/undereat_material/build/compose/logs/createDistributable/codesign-2*txt
+      - name: Rename artifact for nightly upload
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        run: |
+          cp -v /Users/runner/work/undereat_material/undereat_material/build/compose/binaries/main*/dmg/undereat_material-*.dmg undereat-material_nightly.dmg
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly.dmg
+          path: undereat-material_nightly.dmg
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v /Users/runner/work/undereat_material/undereat_material/build/compose/binaries/main*/dmg/undereat_material-*.dmg undereat-material.dmg
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material.dmg"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material_nightly.dmg"
+
+
+
+  build-windows-nightly-artifact:
+    name: Nightly Artifact Windows Build
+    runs-on: windows-latest
+    needs: update-nightly-tag
+    if: |
+      always() &&
+      (needs.update-nightly-tag.result == 'success' ||
+        needs.update-nightly-tag.result == 'skipped')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin' # See 'Supported distributions' for available options
+          java-version: '17'
+
+      - name: test java1
+        shell: bash
+        run:  |
+              java -version
+
+      - name: build package
+        shell: bash
+        run:  |
+          ls -al || echo "_"
+          id || echo "_"
+          pwd || echo "_"
+          ./gradlew packageReleaseDistributionForCurrentOS
+
+      - name: Rename artifact for nightly upload
+        run: |
+          cp -v ./build/compose/binaries/main*/msi/undereat*material*.msi undereat-material_nightly.msi
+          cp -v ./build/compose/binaries/main*/exe/undereat_material-*.exe undereat-material_nightly.exe
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly.msi
+          path: undereat-material_nightly.msi
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v5
+        with:
+          name: undereat-material_nightly.exe
+          path: undereat-material_nightly.exe
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v ./build/compose/binaries/main*/msi/undereat*material*.msi undereat-material.msi
+          cp -v ./build/compose/binaries/main*/exe/undereat_material-*.exe undereat-material.exe
+
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material.msi,undereat-material.exe"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material_nightly.msi,undereat-material_nightly.exe"
+
+  build-windows-nightly-zip-artifact:
+    runs-on: ubuntu-22.04
+    needs: [build-windows-nightly-artifact]
+    if: |
+      always() &&
+      (needs.build-windows-nightly-artifact.result == 'success')
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/download-artifact@v6
+        with:
+          name: undereat-material_nightly.msi
+
+      - name: show artifact
+        run:  ls -al
+
+      - name: install dependencies
+        run: |
+          sudo apt-get update && \
+          sudo DEBIAN_FRONTEND=noninteractive \
+          apt-get install -y --no-install-recommends \
+          ca-certificates \
+          wget \
+          zip \
+          msitools
+
+      - name: show msitools version
+        run:  msiextract --version
+
+      - name: show zip version
+        run:  zip --version
+
+      - name: extract msi2zip
+        run: |
+          id;pwd;ls -al
+          msiextract undereat-material_nightly.msi
+
+      - name: create zip
+        run: |
+          id;pwd;ls -al
+          zip -r undereat-material-windows_nightly.zip undereat_material
+          id;pwd;ls -al
+
+      - name: Rename artifact for release upload
+        if: contains(github.ref, 'refs/tags/v')
+        run: |
+          cp -v undereat-material-windows_nightly.zip undereat-material-windows.zip
+      - name: Upload to versioned release
+        if: contains(github.ref, 'refs/tags/v')
+        uses: ncipollo/release-action@v1
+        with:
+          allowUpdates: true
+          draft: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material-windows.zip"
+
+      - name: Upload to nightly release
+        uses: ncipollo/release-action@v1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        with:
+          allowUpdates: true
+          tag: nightly
+          omitBodyDuringUpdate: true
+          omitNameDuringUpdate: true
+          prerelease: true
+          replacesArtifacts: true
+          token: ${{ secrets.GITHUB_TOKEN }}
+          artifacts: "undereat-material-windows_nightly.zip"
+
+
+  macos-15arm-test:
+    runs-on: macos-15
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v5
+    - name: install cliclick
+      run:  brew install cliclick
+
+    - name: show architecture
+      run:  uname -m
+
+    - name: install imagemagick
+      run:  brew install imagemagick
+
+    - name: install wget
+      run:  brew install wget
+
+    - name: install sendkeys
+      run:  brew install socsieng/tap/sendkeys
+
+    - name: macos-version1
+      run: sw_vers -productVersion
+
+    - name: macos-version2
+      run: system_profiler SPSoftwareDataType
+
+    - name: csrutil-status
+      run: csrutil status || exit 0
+
+    - name: notifications_off_01
+      run: launchctl unload -w /System/Library/LaunchAgents/com.apple.notificationcenterui.plist || exit 0
+
+    - name: notifications_off_02
+      run: killall NotificationCenter || exit 0
+
+    - name: download jshowarch
+      shell: bash
+      run: |
+           curl -L https://github.com/zoff99/jshowarch/archive/refs/heads/master.zip -o master.zip
+           unzip master.zip
+           pwd
+           ls -al jshowarch-master/
+           java -version
+           javac -version
+           cd jshowarch-master/
+           javac jshowarch.java
+
+    - name: startup-app
+      run: |
+           pwd
+           ls -al /Users/runner/
+           _HOME_="/Users/runner/"
+           /usr/libexec/java_home -v 17
+           export JAVA_HOME=$(/usr/libexec/java_home -v17)
+           ./gradlew assemble
+           cliclick -m verbose m:12,34
+           screencapture -T 1 -x -t png /Users/runner/screen01.png &
+           screencapture -T 2 -x -t png /Users/runner/screen02.png &
+           screencapture -T 3 -x -t png /Users/runner/screen03.png &
+           screencapture -T 10 -x -t png /Users/runner/screen04.png &
+           screencapture -T 25 -x -t png /Users/runner/screen05.png &
+           screencapture -T 50 -x -t png /Users/runner/screen06.png &
+           screencapture -T 60 -x -t png /Users/runner/screen07.png &
+           screencapture -T 90 -x -t png /Users/runner/screen09.png &
+           screencapture -T 110 -x -t png /Users/runner/screen10.png &
+           screencapture -T 248 -x -t png /Users/runner/screenshot-macos-15arm.png &
+           screencapture -T 240 -x -t png /Users/runner/screen12.png &
+           screencapture -T 300 -x -t png /Users/runner/screen13.png &
+           pwd
+           ls -al
+           ./gradlew run > undereat.log 2>&1 &
+           pwd
+           sleep 45
+           sleep 15
+           sleep 20
+           cat /Users/runner/work/undereat_material/undereat_material/undereat.log
+           sendkeys apps
+           cd /Users/runner/work/undereat_material/undereat_material/jshowarch-master
+           rm *.class
+           javac jshowarch.java
+           java jshowarch 885 76 165 110 15 1 &
+           sleep 90
+           cliclick -m verbose c:367,623
+           sleep 120
+           cat /Users/runner/work/undereat_material/undereat_material/tester.log
+           pwd
+           ls -al /Users/runner/
+           cp -v /Users/runner/screenshot-macos-15arm.png /Users/runner/work/undereat_material/undereat_material/screenshot-macos-15arm.png
+
+    - name: tweak screenshot
+      run: |
+           cd /Users/runner/work/undereat_material/undereat_material/
+           pwd
+           cp -v screenshot-macos-15arm.png /Users/runner/screenshot-macos-15arm_orig.png
+           convert screenshot-macos-15arm.png -crop 1176x885+0+0 +repage crop_br.png
+           convert screenshot-macos-15arm.png -crop 1919x25+1663+0  crop_br2.png
+           convert screenshot-macos-15arm.png -crop 1560x88+180+993  crop_br3.png
+           convert crop_br3.png  -resize 65%  crop_br3small.png
+           composite -compose Copy -gravity South crop_br3small.png crop_br.png -alpha set dst.png
+           composite -compose Copy -gravity Northeast crop_br2.png dst.png -alpha set dst2.png
+           cp -v dst2.png screenshot-macos-15arm.png
+
+    - name: upload-screenshots
+      uses: actions/upload-artifact@v5
+      with:
+        name: screenshot-macos-15
+        path: |
+          /Users/runner/screen*.png
+
+    - name: Upload to nightly release
+      uses: ncipollo/release-action@v1
+      if: github.ref == 'refs/heads/master'
+      with:
+        allowUpdates: true
+        tag: nightly
+        omitBodyDuringUpdate: true
+        omitNameDuringUpdate: true
+        prerelease: true
+        replacesArtifacts: true
+        token: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "screenshot-macos-15arm.png"
+
+
+
+  linux-ub20-test:
+    runs-on: ubuntu-22.04
+    if: ${{ true }}
+    permissions:
+      contents: write
+    steps:
+        - uses: actions/checkout@v5
+        - name: os version
+          run:  uname -a
+
+        - name: install deps
+          run: |
+               sudo apt-get update
+               sudo apt-get install openjdk-17-jdk-headless openjdk-17-jdk
+               sudo apt-get install imagemagick
+               sudo apt-get install libv4l-0 libv4l-dev
+               sudo apt-get install xdotool xclip
+               sudo apt-get install x11-apps x11-utils
+               sudo apt-get install lwm fvwm
+               sudo apt-get install xvfb
+               sudo apt-get install libpulse0 libnotify4
+
+        - name: install fonts
+          run: |
+               sudo apt-get install xfonts-utils xfonts-scalable xfonts-encodings xfonts-base xfonts-75dpi xfonts-100dpi
+               sudo apt-get install fonts-noto-color-emoji
+               sudo apt-get install fonts-dejavu fonts-dejavu-core fonts-freefont-ttf
+               sudo apt-get install xfonts-wqy \
+               xfonts-efont-unicode xfonts-efont-unicode-ib xfonts-intl-chinese xfonts-intl-chinese-big \
+               xfonts-intl-asian xfonts-intl-arabic xfonts-intl-european xfonts-unifont \
+                fonts-dejavu-core \
+                fonts-dejavu-extra \
+                fonts-droid-fallback \
+                fonts-guru \
+                fonts-guru-extra \
+                fonts-horai-umefont \
+                fonts-kacst \
+                fonts-kacst-one \
+                fonts-khmeros-core \
+                fonts-lao \
+                fonts-liberation \
+                fonts-lklug-sinhala \
+                fonts-lohit-guru \
+                fonts-nanum \
+                fonts-noto-cjk \
+                fonts-opensymbol \
+                fonts-roboto \
+                fonts-roboto-hinted \
+                fonts-sil-abyssinica \
+                fonts-sil-padauk \
+                fonts-stix \
+                fonts-symbola \
+                fonts-takao-pgothic \
+                fonts-thai-tlwg \
+                fonts-tibetan-machine \
+                fonts-tlwg-garuda \
+                fonts-tlwg-kinnari \
+                fonts-tlwg-laksaman \
+                fonts-tlwg-loma \
+                fonts-tlwg-mono \
+                fonts-tlwg-norasi \
+                fonts-tlwg-purisa \
+                fonts-tlwg-sawasdee \
+                fonts-tlwg-typewriter \
+                fonts-tlwg-typist \
+                fonts-tlwg-typo \
+                fonts-tlwg-umpush \
+                fonts-tlwg-waree \
+                fonts-unfonts-core
+
+        - name: create runscript
+          run: |
+               printf '#!/bin/bash\n' > /tmp/a.sh
+               printf 'xclock -digital -geometry 300x45+100+688 &\n' >> /tmp/a.sh
+               printf 'export LC_ALL=zh_CN.utf8\n' >> /tmp/a.sh
+               printf '/home/runner/work/undereat_material/undereat_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
+               printf 'pwd\n' >> /tmp/a.sh
+               printf 'sleep 5\n' >> /tmp/a.sh
+               printf 'sleep 60\n' >> /tmp/a.sh
+               printf 'ls -ratl\n' >> /tmp/a.sh
+               printf 'sleep 4\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_before_wm.png\n' >> /tmp/a.sh
+               printf 'sleep 40\n' >> /tmp/a.sh
+               printf 'fvwm2 &' >> /tmp/a.sh
+               printf 'sleep 20\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 823 305 click 1\n' >> /tmp/a.sh
+               printf 'sleep 90\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
+               cat /tmp/a.sh
+               chmod a+rx /tmp/a.sh
+
+        - name: generate locale
+          run: |
+               cat /etc/locale.gen
+               cat /etc/locale.gen|grep -i zn||echo "NO ERR"
+               echo "zh_CN.UTF-8 UTF-8" |sudo tee -a /etc/locale.gen
+               sudo locale-gen
+
+        - name: generate locale
+          run: |
+               sudo localectl set-locale LANG="zh_CN.UTF-8"
+               export LANG="zh_CN.UTF-8"
+               sudo update-locale
+               locale -a
+               locale
+               locale -c -k LC_NUMERIC
+               sudo update-locale LANG="zh_CN.UTF-8"
+               localectl status
+
+        - name: startup-app
+          run: |
+               pwd
+               ls -al
+               export LC_ALL=zh_CN.utf8
+               ./gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ assemble
+               xvfb-run --server-args="-screen 0 1024x768x24" --auto-servernum /tmp/a.sh
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/undereat_material/undereat_material/undereat.log||echo "NO ERR"
+               echo "++++++++++++++++++"
+               echo "++++++++++++++++++"
+               cat /home/runner/work/undereat_material/undereat_material/tester.log||echo "NO ERR"
+               cp -av /tmp/screenshot-linux.png screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v5
+          with:
+            name: screenshot-linux
+            path: /tmp/screenshot-linux.png
+
+        - name: upload-screenshots
+          uses: actions/upload-artifact@v5
+          with:
+            name: screenshot-linux_before_wm
+            path: /tmp/screenshot-linux_before_wm.png
+
+        - name: Upload to nightly release
+          uses: ncipollo/release-action@v1
+          if: github.ref == 'refs/heads/master'
+          with:
+            allowUpdates: true
+            tag: nightly
+            omitBodyDuringUpdate: true
+            omitNameDuringUpdate: true
+            prerelease: true
+            replacesArtifacts: true
+            token: ${{ secrets.GITHUB_TOKEN }}
+            artifacts: "screenshot-linux.png"
+
+
+
