@@ -13,7 +13,6 @@ import com.zoffcc.applications.undereat.corefuncs.del_g_opts
 import com.zoffcc.applications.undereat.corefuncs.get_g_opts
 import com.zoffcc.applications.undereat.corefuncs.orma
 import com.zoffcc.applications.undereat.corefuncs.set_g_opts
-import com.zoffcc.applications.undereat.SORTER
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
 import globalstore
 import java.util.Locale
