@@ -1,18 +1,14 @@
-@file:Suppress("SpellCheckingInspection", "PropertyName", "ClassName")
+@file:Suppress("SpellCheckingInspection", "PropertyName", "ClassName", "FunctionName", "ConvertToStringTemplate")
 
 package com.zoffcc.applications.undereat
 
-import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
-import java.io.File
 
 const val TAG = "trifa.GlobalStore"
 
@@ -34,8 +30,6 @@ data class globalstore_state(
     val sorterId: Long = 0,
     val filterString: String? = null
 )
-
-private val globalstore_state_lock = Any()
 
 interface GlobalStore {
     fun updateMinimized(value: Boolean)

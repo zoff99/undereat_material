@@ -218,6 +218,9 @@ private fun MainAppStart()
     globalstore.loadUiDensity()
     val appIcon = painterResource("icon-linux.png")
 
+    // HINT: !! until we have settings, set ui density here manually !!
+    globalstore.updateUiDensity(1.73f)
+
     // ----------- main app screen -----------
     // ----------- main app screen -----------
     // ----------- main app screen -----------
