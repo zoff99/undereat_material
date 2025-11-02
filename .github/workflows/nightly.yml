@@ -632,10 +632,8 @@ jobs:
                printf '/home/runner/work/undereat_material/undereat_material/gradlew -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64/ run &\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
                printf 'xwininfo -id $(xdotool getactivewindow)\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 80 74 click 1\n' >> /tmp/a.sh
                printf 'sleep 2\n' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 140 74 click 1\n' >> /tmp/a.sh
                printf 'pwd\n' >> /tmp/a.sh
                printf 'sleep 5\n' >> /tmp/a.sh
                printf 'sleep 60\n' >> /tmp/a.sh
@@ -646,7 +644,7 @@ jobs:
                printf 'sleep 40\n' >> /tmp/a.sh
                printf 'fvwm2 &' >> /tmp/a.sh
                printf 'sleep 20\n' >> /tmp/a.sh
-               printf 'xdotool mousemove --sync 823 305 click 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 1000 400 click 1\n' >> /tmp/a.sh
                printf 'sleep 90\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
