@@ -206,6 +206,7 @@ fun main_list(restaurants: StateRestaurantList) {
                     )
                 )
             }
+            /*
             Button(
                 modifier = Modifier
                     .height(50.dp)
@@ -232,6 +233,7 @@ fun main_list(restaurants: StateRestaurantList) {
                     )
                 }
             )
+             */
         }
         // Header Row ---------------------
 
