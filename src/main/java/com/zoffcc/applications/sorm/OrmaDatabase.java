@@ -24,8 +24,6 @@ public class OrmaDatabase
     final static boolean ORMA_LONG_RUNNING_TRACE = true; // set "false" for release builds
     final static long ORMA_LONG_RUNNING_MS = 180;
 
-    private static final String CREATE_DB_FILE_SHA256SUM = "LvrHIP4y43BVnVTsd6Y1kAZXqaqKQPnRk3+0HKFP0xA=";
-    private static final String CREATE_DB_FILE_ON_WINDOWS_SHA256SUM = "5QKQ8Ga1SXdvsiEbf6Ps99KdIJVTNldtI42C3UMI9DM=";
     public static Connection sqldb = null;
     static int current_db_version = 0;
     //
@@ -403,12 +401,12 @@ public class OrmaDatabase
 
     public static int update_db(final int current_db_version)
     {
-        //noinspection StatementWithEmptyBody
         if (current_db_version < 1)
         {
             // dummy. sadly now it has to stay.
         }
 
+        /*
         if (current_db_version < 2)
         {
             try
@@ -420,266 +418,13 @@ public class OrmaDatabase
             }
             catch (Exception e)
             {
+                Log.i(TAG, "ERR:UPDB:001:" + e.getMessage());
                 e.printStackTrace();
             }
         }
+        */
 
-        if (current_db_version < 3)
-        {
-            try
-            {
-                final String update_001 =
-                        "alter table Message add msg_at_relay BOOLEAN NOT NULL DEFAULT false;" + "\n" +
-                                "CREATE INDEX index_msg_at_relay_on_Message ON Message (msg_at_relay);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 4)
-        {
-            try
-            {
-                final String update_001 = "alter table FriendList add push_url TEXT DEFAULT NULL;" + "\n" +
-                        "CREATE INDEX index_push_url_on_FriendList ON FriendList (push_url);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 5)
-        {
-            try
-            {
-                final String update_001 = "alter table Message add msg_idv3_hash TEXT DEFAULT NULL;" + "\n" +
-                        "CREATE INDEX index_msg_idv3_hash_on_Message ON Message (msg_idv3_hash);";
-                run_multi_sql(update_001);
-                final String update_002 = "alter table Message add sent_push INTEGER DEFAULT '0';" + "\n" +
-                        "CREATE INDEX index_sent_push_on_Message ON Message (sent_push);";
-                run_multi_sql(update_002);
-
-                final String update_003 = "alter table FriendList add capabilities INTEGER DEFAULT '0';" + "\n" +
-                        "CREATE INDEX index_capabilities_on_FriendList ON FriendList (capabilities);";
-                run_multi_sql(update_003);
-                final String update_004 = "alter table FriendList add msgv3_capability INTEGER DEFAULT '0';" + "\n" +
-                        "CREATE INDEX index_msgv3_capability_on_FriendList ON FriendList (msgv3_capability);";
-                run_multi_sql(update_004);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 6)
-        {
-            try
-            {
-                // @formatter:off
-                final String update_001 = "CREATE TABLE IF NOT EXISTS GroupDB ( " +
-                        "who_invited__tox_public_key_string  TEXT, "+
-                        "name TEXT, "+
-                        "topic TEXT, "+
-                        "peer_count  INTEGER NOT NULL DEFAULT -1, "+
-                        "own_peer_number  INTEGER NOT NULL DEFAULT -1, "+
-                        "privacy_state INTEGER NOT NULL DEFAULT 1, "+
-                        "tox_group_number  INTEGER NOT NULL DEFAULT -1, "+
-                        "group_active BOOLEAN DEFAULT false, "+
-                        "notification_silent BOOLEAN DEFAULT false, "+
-                        "group_identifier TEXT, "+
-                        "PRIMARY KEY(\"group_identifier\") "+
-                        ");";
-                // @formatter:on
-                run_multi_sql(update_001);
-
-                // @formatter:off
-                final String update_002 = "CREATE TABLE IF NOT EXISTS GroupMessage ( " +
-                        "message_id_tox  TEXT , "+
-                        "group_identifier  TEXT NOT NULL DEFAULT \"-1\", "+
-                        "tox_group_peer_pubkey  TEXT NOT NULL, "+
-                        "private_message  INTEGER NOT NULL DEFAULT 0, "+
-                        "tox_group_peername  TEXT, "+
-                        "direction  INTEGER NOT NULL , "+
-                        "TOX_MESSAGE_TYPE  INTEGER NOT NULL , "+
-                        "TRIFA_MESSAGE_TYPE  INTEGER NOT NULL DEFAULT 0 , "+
-                        "sent_timestamp  INTEGER, "+
-                        "rcvd_timestamp  INTEGER, "+
-                        "read   BOOLEAN NOT NULL DEFAULT 0 , "+
-                        "is_new   BOOLEAN NOT NULL DEFAULT 1 , "+
-                        "text  TEXT, "+
-                        "was_synced   BOOLEAN NOT NULL DEFAULT 0 , "+
-                        "msg_id_hash   TEXT, "+
-                        "id INTEGER, "+
-                        "PRIMARY KEY(\"id\") "+
-                        ");";
-                // @formatter:on
-                run_multi_sql(update_002);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 7)
-        {
-            try
-            {
-                // @formatter:off
-                final String update_001 = "CREATE INDEX IF NOT EXISTS index_message_id_tox_on_GroupMessage ON GroupMessage (message_id_tox);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_group_identifier_tox_on_GroupMessage ON GroupMessage (group_identifier);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_tox_group_peer_pubkey_on_GroupMessage ON GroupMessage (tox_group_peer_pubkey);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_direction_on_GroupMessage ON GroupMessage (direction);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_TOX_MESSAGE_TYPE_on_GroupMessage ON GroupMessage (TOX_MESSAGE_TYPE);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_TRIFA_MESSAGE_TYPE_on_GroupMessage ON GroupMessage (TRIFA_MESSAGE_TYPE);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_rcvd_timestamp_on_GroupMessage ON GroupMessage (rcvd_timestamp);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_sent_timestamp_on_GroupMessage ON GroupMessage (sent_timestamp);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_private_message_on_GroupMessage ON GroupMessage (private_message);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_tox_group_peername_on_GroupMessage ON GroupMessage (tox_group_peername);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_was_synced_on_GroupMessage ON GroupMessage (was_synced);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_is_new_on_GroupMessage ON GroupMessage (is_new);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_msg_id_hash_on_GroupMessage ON GroupMessage (msg_id_hash);";
-                run_multi_sql(update_001);
-                // @formatter:on
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 8)
-        {
-            try
-            {
-                // @formatter:off
-                final String update_001 = "CREATE INDEX IF NOT EXISTS index_who_invited__tox_public_key_string_on_GroupDB ON GroupDB (who_invited__tox_public_key_string);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_name_on_GroupDB ON GroupDB (name);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_topic_on_GroupDB ON GroupDB (topic);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_peer_count_on_GroupDB ON GroupDB (peer_count);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_own_peer_number_on_GroupDB ON GroupDB (own_peer_number);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_privacy_state_on_GroupDB ON GroupDB (privacy_state);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_tox_group_number_on_GroupDB ON GroupDB (tox_group_number);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_group_active_on_GroupDB ON GroupDB (group_active);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_notification_silent_on_GroupDB ON GroupDB (notification_silent);\n" +
-                        "CREATE INDEX IF NOT EXISTS index_group_identifier_on_GroupDB ON GroupDB (group_identifier);";
-
-                run_multi_sql(update_001);
-                // @formatter:on
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 9)
-        {
-            try
-            {
-                final String update_001 = "alter table Filetransfer add tox_file_id_hex TEXT DEFAULT NULL;" + "\n" +
-                        "CREATE INDEX index_tox_file_id_hex_on_Filetransfer ON Filetransfer (tox_file_id_hex);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 10)
-        {
-            try
-            {
-                final String update_001 = "alter table Message add filetransfer_kind INTEGER NOT NULL DEFAULT 0;" + "\n" +
-                        "CREATE INDEX index_filetransfer_kind_on_Message ON Message (filetransfer_kind);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 11)
-        {
-            try
-            {
-                final String update_001 = "alter table GroupMessage add path_name TEXT DEFAULT NULL;" + "\n" +
-                "CREATE INDEX index_path_name_on_GroupMessage ON GroupMessage (path_name);";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            try
-            {
-            final String update_002 = "alter table GroupMessage add file_name TEXT DEFAULT NULL;" + "\n" +
-                "CREATE INDEX index_file_name_on_GroupMessage ON GroupMessage (file_name);";
-                run_multi_sql(update_002);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            try
-            {
-                final String update_003 = "alter table GroupMessage add filename_fullpath TEXT DEFAULT NULL;" + "\n" +
-                "CREATE INDEX index_filename_fullpath_on_GroupMessage ON GroupMessage (filename_fullpath);";
-                run_multi_sql(update_003);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-            try
-            {
-                final String update_004 = "alter table GroupMessage add filesize INTEGER NOT NULL DEFAULT 0;" + "\n" +
-                "CREATE INDEX index_filesize_on_GroupMessage ON GroupMessage (filesize);";
-                run_multi_sql(update_004);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 12)
-        {
-            try
-            {
-                final String update_001 = "alter table FriendList add avatar_hex TEXT DEFAULT NULL;" + "\n" +
-                        "alter table FriendList add avatar_hash_hex TEXT DEFAULT NULL;";
-                run_multi_sql(update_001);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        if (current_db_version < 13)
-        {
-            try
-            {
-                final String update_004 = "alter table GroupMessage add tox_group_peer_role INTEGER NOT NULL DEFAULT '-1';" + "\n" +
-                        "CREATE INDEX index_tox_group_peer_role_on_GroupMessage ON GroupMessage (tox_group_peer_role);";
-                run_multi_sql(update_004);
-            }
-            catch (Exception e)
-            {
-                e.printStackTrace();
-            }
-        }
-
-        final int new_db_version = 13;
+        final int new_db_version = 1;
         set_new_db_version(new_db_version);
         // return the updated DB VERSION
         return new_db_version;
@@ -772,30 +517,6 @@ public class OrmaDatabase
     {
         try
         {
-            final File resources_dir = new File(System.getProperty("compose.application.resources.dir"));
-            Log.i(TAG, "resources dir: " + resources_dir);
-            String asset_filename = resources_dir.getCanonicalPath() + File.separator + "main.db.txt";
-            Log.i(TAG, "loading asset file: " + asset_filename);
-            String sha256sum_of_create_db_file = sha256sum_of_file(asset_filename);
-            Log.i(TAG, "create_db:sha256sum_of_create_db_file=" + sha256sum_of_create_db_file);
-            // TODO: on windows systems the checksum does not seem to match?
-            // it must be "\r\n" in the sql textfile the file has more bytes also?
-            if ((sha256sum_of_create_db_file.equals(CREATE_DB_FILE_SHA256SUM))
-                || (sha256sum_of_create_db_file.equals(CREATE_DB_FILE_ON_WINDOWS_SHA256SUM)))
-            {
-                String create_db_sqls = readSQLFileAsString(asset_filename);
-                if (current_db_version == 0)
-                {
-                    run_multi_sql(create_db_sqls);
-                }
-            }
-            else
-            {
-                Log.i(TAG, "expected:"+ CREATE_DB_FILE_SHA256SUM);
-                Log.i(TAG, "     git:" + sha256sum_of_create_db_file);
-                Log.i(TAG, "create_db:input file sha256 hash does not match!");
-                System.exit(5);
-            }
         }
         catch (Exception e)
         {
@@ -1066,299 +787,83 @@ public class OrmaDatabase
     }
 
 
-    public ConferenceDB selectFromConferenceDB()
+    public lov selectFromlov()
     {
-        ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "SELECT * FROM \"ConferenceDB\"";
+        lov ret = new lov();
+        ret.sql_start = "SELECT * FROM \"lov\"";
         return ret;
     }
 
-    public long insertIntoConferenceDB(ConferenceDB obj)
+    public long insertIntolov(lov obj)
     {
         return obj.insert();
     }
 
-    public ConferenceDB updateConferenceDB()
+    public lov updatelov()
     {
-        ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "UPDATE \"ConferenceDB\"";
+        lov ret = new lov();
+        ret.sql_start = "UPDATE \"lov\"";
         return ret;
     }
 
-    public ConferenceDB deleteFromConferenceDB()
+    public lov deleteFromlov()
     {
-        ConferenceDB ret = new ConferenceDB();
-        ret.sql_start = "DELETE FROM \"ConferenceDB\"";
+        lov ret = new lov();
+        ret.sql_start = "DELETE FROM \"lov\"";
         return ret;
     }
 
 
-    public BootstrapNodeEntryDB selectFromBootstrapNodeEntryDB()
+    public Category selectFromCategory()
     {
-        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
-        ret.sql_start = "SELECT * FROM \"BootstrapNodeEntryDB\"";
+        Category ret = new Category();
+        ret.sql_start = "SELECT * FROM \"Category\"";
         return ret;
     }
 
-    public long insertIntoBootstrapNodeEntryDB(BootstrapNodeEntryDB obj)
+    public long insertIntoCategory(Category obj)
     {
         return obj.insert();
     }
 
-    public BootstrapNodeEntryDB updateBootstrapNodeEntryDB()
+    public Category updateCategory()
     {
-        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
-        ret.sql_start = "UPDATE \"BootstrapNodeEntryDB\"";
+        Category ret = new Category();
+        ret.sql_start = "UPDATE \"Category\"";
         return ret;
     }
 
-    public BootstrapNodeEntryDB deleteFromBootstrapNodeEntryDB()
+    public Category deleteFromCategory()
     {
-        BootstrapNodeEntryDB ret = new BootstrapNodeEntryDB();
-        ret.sql_start = "DELETE FROM \"BootstrapNodeEntryDB\"";
+        Category ret = new Category();
+        ret.sql_start = "DELETE FROM \"Category\"";
         return ret;
     }
 
 
-    public ConferenceMessage selectFromConferenceMessage()
+    public Restaurant selectFromRestaurant()
     {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "SELECT * FROM \"ConferenceMessage\"";
+        Restaurant ret = new Restaurant();
+        ret.sql_start = "SELECT * FROM \"Restaurant\"";
         return ret;
     }
 
-    public long insertIntoConferenceMessage(ConferenceMessage obj)
+    public long insertIntoRestaurant(Restaurant obj)
     {
         return obj.insert();
     }
 
-    public ConferenceMessage updateConferenceMessage()
+    public Restaurant updateRestaurant()
     {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "UPDATE \"ConferenceMessage\"";
+        Restaurant ret = new Restaurant();
+        ret.sql_start = "UPDATE \"Restaurant\"";
         return ret;
     }
 
-    public ConferenceMessage deleteFromConferenceMessage()
+    public Restaurant deleteFromRestaurant()
     {
-        ConferenceMessage ret = new ConferenceMessage();
-        ret.sql_start = "DELETE FROM \"ConferenceMessage\"";
-        return ret;
-    }
-
-
-    public FileDB selectFromFileDB()
-    {
-        FileDB ret = new FileDB();
-        ret.sql_start = "SELECT * FROM \"FileDB\"";
-        return ret;
-    }
-
-    public long insertIntoFileDB(FileDB obj)
-    {
-        return obj.insert();
-    }
-
-    public FileDB updateFileDB()
-    {
-        FileDB ret = new FileDB();
-        ret.sql_start = "UPDATE \"FileDB\"";
-        return ret;
-    }
-
-    public FileDB deleteFromFileDB()
-    {
-        FileDB ret = new FileDB();
-        ret.sql_start = "DELETE FROM \"FileDB\"";
-        return ret;
-    }
-
-
-    public Filetransfer selectFromFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "SELECT * FROM \"Filetransfer\"";
-        return ret;
-    }
-
-    public long insertIntoFiletransfer(Filetransfer obj)
-    {
-        return obj.insert();
-    }
-
-    public Filetransfer updateFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "UPDATE \"Filetransfer\"";
-        return ret;
-    }
-
-    public Filetransfer deleteFromFiletransfer()
-    {
-        Filetransfer ret = new Filetransfer();
-        ret.sql_start = "DELETE FROM \"Filetransfer\"";
-        return ret;
-    }
-
-
-    public FriendList selectFromFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "SELECT * FROM \"FriendList\"";
-        return ret;
-    }
-
-    public long insertIntoFriendList(FriendList obj)
-    {
-        return obj.insert();
-    }
-
-    public FriendList updateFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "UPDATE \"FriendList\"";
-        return ret;
-    }
-
-    public FriendList deleteFromFriendList()
-    {
-        FriendList ret = new FriendList();
-        ret.sql_start = "DELETE FROM \"FriendList\"";
-        return ret;
-    }
-
-
-    public GroupMessage selectFromGroupMessage()
-    {
-        GroupMessage ret = new GroupMessage();
-        ret.sql_start = "SELECT * FROM \"GroupMessage\"";
-        return ret;
-    }
-
-    public long insertIntoGroupMessage(GroupMessage obj)
-    {
-        return obj.insert();
-    }
-
-    public GroupMessage updateGroupMessage()
-    {
-        GroupMessage ret = new GroupMessage();
-        ret.sql_start = "UPDATE \"GroupMessage\"";
-        return ret;
-    }
-
-    public GroupMessage deleteFromGroupMessage()
-    {
-        GroupMessage ret = new GroupMessage();
-        ret.sql_start = "DELETE FROM \"GroupMessage\"";
-        return ret;
-    }
-
-
-    public GroupDB selectFromGroupDB()
-    {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "SELECT * FROM \"GroupDB\"";
-        return ret;
-    }
-
-    public long insertIntoGroupDB(GroupDB obj)
-    {
-        return obj.insert();
-    }
-
-    public GroupDB updateGroupDB()
-    {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "UPDATE \"GroupDB\"";
-        return ret;
-    }
-
-    public GroupDB deleteFromGroupDB()
-    {
-        GroupDB ret = new GroupDB();
-        ret.sql_start = "DELETE FROM \"GroupDB\"";
-        return ret;
-    }
-
-
-    public RelayListDB selectFromRelayListDB()
-    {
-        RelayListDB ret = new RelayListDB();
-        ret.sql_start = "SELECT * FROM \"RelayListDB\"";
-        return ret;
-    }
-
-    public long insertIntoRelayListDB(RelayListDB obj)
-    {
-        return obj.insert();
-    }
-
-    public RelayListDB updateRelayListDB()
-    {
-        RelayListDB ret = new RelayListDB();
-        ret.sql_start = "UPDATE \"RelayListDB\"";
-        return ret;
-    }
-
-    public RelayListDB deleteFromRelayListDB()
-    {
-        RelayListDB ret = new RelayListDB();
-        ret.sql_start = "DELETE FROM \"RelayListDB\"";
-        return ret;
-    }
-
-
-    public TRIFADatabaseGlobalsNew selectFromTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "SELECT * FROM \"TRIFADatabaseGlobalsNew\"";
-        return ret;
-    }
-
-    public long insertIntoTRIFADatabaseGlobalsNew(TRIFADatabaseGlobalsNew obj)
-    {
-        return obj.insert();
-    }
-
-    public TRIFADatabaseGlobalsNew updateTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "UPDATE \"TRIFADatabaseGlobalsNew\"";
-        return ret;
-    }
-
-    public TRIFADatabaseGlobalsNew deleteFromTRIFADatabaseGlobalsNew()
-    {
-        TRIFADatabaseGlobalsNew ret = new TRIFADatabaseGlobalsNew();
-        ret.sql_start = "DELETE FROM \"TRIFADatabaseGlobalsNew\"";
-        return ret;
-    }
-
-
-    public Message selectFromMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "SELECT * FROM \"Message\"";
-        return ret;
-    }
-
-    public long insertIntoMessage(Message obj)
-    {
-        return obj.insert();
-    }
-
-    public Message updateMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "UPDATE \"Message\"";
-        return ret;
-    }
-
-    public Message deleteFromMessage()
-    {
-        Message ret = new Message();
-        ret.sql_start = "DELETE FROM \"Message\"";
+        Restaurant ret = new Restaurant();
+        ret.sql_start = "DELETE FROM \"Restaurant\"";
         return ret;
     }
 

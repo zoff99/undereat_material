@@ -12,7 +12,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.github.gmazzo.buildconfig") version "5.7.0"
     id("org.ajoberstar.grgit") version "5.3.3"
-    id("io.gitlab.arturbosch.detekt") version("1.23.3")
     id("de.undercouch.download") version "5.6.0"
 }
 
@@ -27,10 +26,6 @@ repositories {
     mavenCentral()
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     google()
-}
-
-detekt {
-    config.setFrom(file("config/detekt/detekt.yml"))
 }
 
 buildConfig {

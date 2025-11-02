@@ -4,16 +4,26 @@
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.DrawerState
 import androidx.compose.material.DrawerValue
+import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ProvideTextStyle
 import androidx.compose.material.Scaffold
 import androidx.compose.material.ScaffoldState
 import androidx.compose.material.SnackbarDuration
 import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
+import androidx.compose.material.Typography
+import androidx.compose.material.lightColors
 import androidx.compose.material.rememberScaffoldState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -24,6 +34,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -33,7 +44,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEventType
 import androidx.compose.ui.input.key.isAltPressed
@@ -45,11 +55,14 @@ import androidx.compose.ui.input.key.type
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowExceptionHandler
@@ -59,13 +72,14 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
 import com.zoffcc.applications.undereat.Log
+import com.zoffcc.applications.undereat.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.undereat.PrefsSettings
-import com.zoffcc.applications.undereat.TAG
+import com.zoffcc.applications.undereat.createGlobalStore
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.launchIn
@@ -75,87 +89,23 @@ import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.io.File
 import java.util.*
-import java.util.concurrent.Executors
 import java.util.prefs.Preferences
 
 private const val TAG = "undereat.Main.kt"
-var tox_running_state_wrapper = "start"
-var start_button_text_wrapper = "stopped"
-var online_button_text_wrapper = "offline"
-var online_button_color_wrapper = Color.White.toArgb()
 var closing_application = false
 val global_prefs: Preferences = Preferences.userNodeForPackage(com.zoffcc.applications.undereat.PrefsSettings::class.java)
 val UISCALE_ITEM_HEIGHT = 30.dp
-val CONTACTITEM_HEIGHT = 50.dp
-val GROUPITEM_HEIGHT = 50.dp
-val GROUP_PEER_HEIGHT = 33.dp
 val SETTINGS_HEADER_SIZE = 56.dp
-val CONTACT_COLUMN_WIDTH = 230.dp
-const val CONTACT_COLUMN_CONTACTNAME_LEN_THRESHOLD = 13
-const val PUSHURL_SHOW_LEN_THRESHOLD = 60
-val GROUPS_COLUMN_WIDTH = 190.dp
-val GROUPS_COLLAPSED_COLUMN_WIDTH = 50.dp
-const val GROUPS_COLUMN_GROUPNAME_LEN_THRESHOLD = 13
-val GROUP_PEER_COLUMN_WIDTH = 165.dp
-val GROUP_COLLAPSED_PEER_COLUMN_WIDTH = 45.dp
-const val GROUP_PEER_COLUMN_PEERNAME_LEN_THRESHOLD = 12
-val MESSAGE_INPUT_LINE_HEIGHT = 58.dp
-val MAIN_TOP_TAB_HEIGHT = 160.dp
-const val IMAGE_PREVIEW_SIZE = 70f
-const val AVATAR_SIZE = 40f
-const val MAX_AVATAR_SIZE = 70f
-val SPACE_AFTER_LAST_MESSAGE = 2.dp
-val SPACE_BEFORE_FIRST_MESSAGE = 10.dp
-const val LAST_MSG_SCROLL_TO_SCROLL_OFFSET = 10000
-const val VIDEO_PLACEHOLDER_ALPHA = 0.2f
-val AV_SELECTOR_ICON_SIZE = 10.dp
-val VIDEO_IN_BOX_WIDTH_SMALL = 80.dp
-val VIDEO_IN_BOX_HEIGHT_SMALL = 80.dp
-const val VIDEO_IN_BOX_WIDTH_FRACTION_SMALL = 0.3f
-const val VIDEO_IN_BOX_WIDTH_FRACTION_BIG = 0.9f
-val VIDEO_STATS_TEXT_HEIGHT = 20.dp
-val VIDEO_IN_BOX_WIDTH_BIG = 800.dp
-val VIDEO_IN_BOX_HEIGHT_BIG = 3000.dp
-val VIDEO_OUT_BOX_WIDTH_SMALL = 130.dp
-val VIDEO_OUT_BOX_HEIGHT_SMALL = 100.dp
-val VIDEO_OUT_BOX_WIDTH_BIG = 500.dp
-val VIDEO_OUT_BOX_HEIGHT_BIG = 500.dp
-const val DOUBLE_BUFFER_VIDEOIN = true
-const val DOUBLE_BUFFER_VIDEOOUT = true
-val SAVEDATA_PATH_WIDTH = 200.dp
-val SAVEDATA_PATH_HEIGHT = 50.dp
-val MYTOXID_WIDTH = 200.dp
-val MYTOXID_HEIGHT = 50.dp
-val MAIN_STATUS_BAR_HEIGHT = 18.dp
-val MESSAGE_BOX_BOTTOM_PADDING = 4.dp
-const val MSG_TEXT_FONT_SIZE_MIXED = 14.0f
-const val MSG_TEXT_FONT_SIZE_EMOJI_ONLY = 55.0f
-const val MAX_EMOJI_POP_SEARCH_LEN = 20
-const val MAX_EMOJI_POP_RESULT = 15
-const val MAX_ONE_ON_ONE_MESSAGES_TO_SHOW = 20000
-const val MAX_GROUP_MESSAGES_TO_SHOW = 20000
 const val SNACKBAR_TOAST_MS_DURATION: Long = 1200
-const val BG_COLOR_RELAY_CONTACT_ITEM = 0x448ABEB9
-const val BG_COLOR_OWN_RELAY_CONTACT_ITEM = 0x44FFFFB9
-const val URL_TEXTVIEW_URL_COLOR = 0xFF223DDC
-const val NGC_PRIVATE_MSG_INDICATOR_COLOR = 0xFFFFA255
-val VIDEO_BOX_BG_COLOR = Color(0x00E7E7E7) // this is now fully transparent. but just in case the color vaule of the grey BG is saved here
-val MESSAGE_PUSH_CHECKMARK_COLOR = Color(0xFF2684A7)
-val DELIVERY_CHECKMARK_COLOR = Color(0xFF2684A7)
-val DELIVERY_CONFIRM_CHECKMARK_COLOR = Color(0xFF2684A7)
-val MESSAGE_CHECKMARKS_ICON_SIZE = 12.dp
-val MESSAGE_CHECKMARKS_CONTAINER_SIZE = 12.dp
-const val NGC_PEER_LUMINANCE_THRESHOLD_FOR_SHADOW = 0.733 // 0.85f // 0.935f // 0.733f // 0.935f
-const val NGC_PEER_SHADOW_COLOR = 0xFF444444
-val ImageloaderDispatcher = Executors.newFixedThreadPool(5).asCoroutineDispatcher()
-val APPDIRS = AppDirs("trifa_undereat", "zoxcore")
+val APPDIRS = AppDirs("undereat_material", "zoxcore")
 val RESOURCESDIR = File(System.getProperty("compose.application.resources.dir"))
-const val GENERIC_TOR_USERAGENT = "Mozilla/5.0 (Windows NT 6.1; rv:60.0) Gecko/20100101 Firefox/60.0"
 var scaffoldState: ScaffoldState = ScaffoldState(drawerState = DrawerState(initialValue = DrawerValue.Closed), snackbarHostState = SnackbarHostState())
 @OptIn(DelicateCoroutinesApi::class)
 var ScaffoldCoroutineScope: CoroutineScope = GlobalScope
 var NotoEmojiFont: FontFamily? = null
 var DefaultFont: FontFamily? = null
+
+val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -164,7 +114,6 @@ fun App()
 {
     println("User data dir: " + APPDIRS.getUserDataDir())
     println("User data dir (roaming): " + APPDIRS.getUserDataDir(roaming = true))
-    savepathstore.updatePath(APPDIRS.getUserDataDir(roaming = true))
     println("User config dir: " + APPDIRS.getUserConfigDir())
     println("User config dir (roaming): " + APPDIRS.getUserConfigDir(roaming = true))
     println("User cache dir: " + APPDIRS.getUserCacheDir())
@@ -183,7 +132,7 @@ fun App()
     }
 
     Log.i(TAG, "resources dir: " + RESOURCESDIR)
-    Log.i(TAG, "resources dir canonical: " + RESOURCESDIR.canonicalPath + File.separator)
+    // Log.i(TAG, "resources dir canonical: " + RESOURCESDIR.canonicalPath + File.separator)
 
     Log.i(TAG, "CCCC:" + PrefsSettings::class.java)
 
@@ -240,15 +189,9 @@ fun main() = application(exitProcessOnExit = true) {
     { // e.printStackTrace()
     }
 
-    try {
-        set_resouces_dir(RESOURCESDIR.canonicalPath)
-    } catch(_: Exception) {}
-
     // ------- set UI look and feel to "system" for java AWT ----------
     // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName())
     // ------- set UI look and feel to "system" for java AWT ----------
-
-    init_system_tray(RESOURCESDIR.canonicalPath + File.separator + "icon-linux.png")
 
     MainAppStart()
 }
@@ -341,7 +284,7 @@ private fun MainAppStart()
             {
                 Dialog(
                     onCloseRequest = { isAskingToClose = false },
-                    title = i18n("ui.close_trifa"),
+                    title = i18n("ui.close_undereat"),
                 ) {
                     Button(onClick = {
                         Log.i(TAG, "closing application")
@@ -443,3 +386,71 @@ fun Modifier.dashedBorder(strokeWidth: Dp, color: Color, cornerRadiusDp: Dp) = c
     }
 )
 
+fun get_trifa_build_str(): String
+{
+    var build_str = ""
+
+    try
+    {
+        build_str = build_str + BuildConfig.GIT_COMMIT_HASH.take(4)
+    } catch (e: java.lang.Exception)
+    {
+        build_str = build_str + "??????????".take(4)
+    }
+
+    try
+    {
+        build_str = build_str + "-" + System.getProperty("os.arch")
+    } catch (e: java.lang.Exception)
+    {
+        build_str = build_str + "??????????".take(3)
+    }
+
+    return build_str
+}
+
+@Composable
+fun Theme(content: @Composable () -> Unit)
+{
+    var Typography: androidx.compose.material.Typography? = null
+    try
+    {
+        Typography = Typography(
+            defaultFontFamily = DefaultFont!!
+        )
+    }
+    catch(_: Exception)
+    {
+        Typography = MaterialTheme.typography
+    }
+
+    // colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+    // TextFieldDefaults.textFieldColors(backgroundColor = Color(ChatColorsConfig.LIGHT__TEXTFIELD_BGCOLOR))
+    MaterialTheme(
+        typography = Typography!!,
+        colors = lightColors(
+            surface = Color(ChatColorsConfig.LIGHT__FGCOLOR),
+            background = Color(ChatColorsConfig.LIGHT__BGCOLOR),
+        ),
+    ) {
+        ProvideTextStyle(LocalTextStyle.current.copy(letterSpacing = 0.sp)) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun UIScaleItem(
+    label: String,
+    description: String,
+    setting: @Composable (RowScope.() -> Unit),
+) = Row(Modifier.randomDebugBorder().fillMaxWidth().height(UISCALE_ITEM_HEIGHT)
+    .padding(horizontal = 16.dp).
+    semantics(mergeDescendants = true) { // it would be nicer to derive the contentDescriptions from the descendants automatically
+        // which is currently not supported in Compose for Desktop
+        // see https://github.com/JetBrains/compose-jb/issues/2111
+        contentDescription = description
+    }, verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.End) {
+    Text(label)
+    setting()
+}

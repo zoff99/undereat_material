@@ -1,9 +1,6 @@
 package com.zoffcc.applications.undereat
 
 import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
-import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__tox_savefile_dir
-import com.zoffcc.applications.undereat.TRIFAGlobals.VFS_FILE_DIR
-import com.zoffcc.applications.undereat.TRIFAGlobals.VFS_TMP_FILE_DIR
 import global_prefs
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
@@ -14,6 +11,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.launch
 import java.io.File
+
+const val TAG = "trifa.GlobalStore"
 
 data class globalstore_state(
     val mainwindow_minimized: Boolean = false,
@@ -287,13 +286,6 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
                 {
                     if (state.ormaRunning)
                     {
-                        unread_count = TrifaToxService.orma!!.selectFromMessage()
-                            .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
-                            .is_newEq(true).count()
-                        if (unread_count > 0)
-                        {
-                            // Log.i(TAG, "try_clear_unread_message_count:unread_count=" + unread_count)
-                        }
                     }
                 } catch (e: Exception)
                 {
@@ -325,13 +317,6 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
             {
                 if (state.ormaRunning)
                 {
-                    unread_count = TrifaToxService.orma!!.selectFromGroupMessage()
-                        .directionEq(TRIFAGlobals.TRIFA_MSG_DIRECTION.TRIFA_MSG_DIRECTION_RECVD.value)
-                        .is_newEq(true).count()
-                    if (unread_count != 0)
-                    {
-                        // Log.i(TAG, "try_clear_unread_group_message_count:unread_count=" + unread_count)
-                    }
                 }
             }
             catch (e: Exception)
@@ -348,87 +333,3 @@ fun CoroutineScope.createGlobalStore(): GlobalStore {
     }
 }
 
-data class savepathenabled_state(
-    val savePathEnabled: Boolean = true,
-    val savePath: String = File(MainActivity.PREF__tox_savefile_dir).canonicalPath + File.separator
-)
-
-interface SavepathStore {
-    fun updatePath(p: String)
-    fun createPathDirectories()
-    fun updateEnabled(e: Boolean)
-    fun isEnabled(): Boolean
-    val stateFlow: StateFlow<savepathenabled_state>
-    val state get() = stateFlow.value
-}
-
-fun CoroutineScope.createSavepathStore(): SavepathStore {
-    val mutableStateFlow = MutableStateFlow(savepathenabled_state())
-    val channelPath: Channel<String> = Channel(Channel.UNLIMITED)
-    val channelEnabled: Channel<Boolean> = Channel(Channel.UNLIMITED)
-
-    return object : SavepathStore {
-        override val stateFlow: StateFlow<savepathenabled_state> = mutableStateFlow
-
-        override fun updatePath(p: String) {
-            launch {
-                channelPath.send(p)
-            }
-        }
-        override fun createPathDirectories()
-        {
-            try
-            {
-                val dir_file = File(PREF__tox_savefile_dir)
-                dir_file.mkdirs()
-            }
-            catch(e: Exception)
-            {
-                Log.i(TAG, "error creating savefile directory and parents: " + PREF__tox_savefile_dir)
-            }
-        }
-
-        override fun updateEnabled(e: Boolean) {
-            launch {
-                channelEnabled.send(e)
-            }
-        }
-        override fun isEnabled(): Boolean
-        {
-            return state.savePathEnabled
-        }
-
-        init {
-            launch {
-                channelEnabled.consumeAsFlow().collect { item ->
-                    mutableStateFlow.value =
-                        state.copy(
-                            savePathEnabled = item,
-                            savePath = state.savePath
-                        )
-                }
-            }
-            launch {
-                channelPath.consumeAsFlow().collect { item ->
-                    try
-                    {
-                        PREF__tox_savefile_dir = item
-                        PREF__database_files_dir = item
-                        VFS_TMP_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/tempdir/files/"
-                        VFS_FILE_DIR = PREF__tox_savefile_dir + File.separator + "/datadir/files/"
-                        mutableStateFlow.value =
-                            state.copy(
-                                savePathEnabled = state.savePathEnabled,
-                                savePath = item
-                            )
-                    }
-                    catch(e: Exception)
-                    {
-                        Log.i(TAG, "error setting savefile dir: " + item)
-                    }
-                }
-            }
-
-        }
-    }
-}
