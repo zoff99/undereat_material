@@ -70,7 +70,7 @@ public class Restaurant
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public boolean only_evening;
 
-    static Restaurant deep_copy(Restaurant in)
+    public static Restaurant deep_copy(Restaurant in)
     {
         Restaurant out = new Restaurant();
         out.id = in.id;

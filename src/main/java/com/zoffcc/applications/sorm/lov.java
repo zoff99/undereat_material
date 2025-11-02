@@ -25,7 +25,7 @@ public class lov
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String value;
 
-    static lov deep_copy(lov in)
+    public static lov deep_copy(lov in)
     {
         lov out = new lov();
         out.key = in.key;

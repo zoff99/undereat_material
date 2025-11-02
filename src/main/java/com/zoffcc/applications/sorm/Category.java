@@ -25,7 +25,7 @@ public class Category
     @Column(indexed = true, helpers = Column.Helpers.ALL)
     public String name;
 
-    static Category deep_copy(Category in)
+    public static Category deep_copy(Category in)
     {
         Category out = new Category();
         out.id = in.id;
