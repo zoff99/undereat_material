@@ -1,5 +1,5 @@
 main.db
-com/zoffcc/applications/sorm/*.class
+# com/zoffcc/applications/sorm/*.class
 org/example/*.class
 test/org/example/
 test/com/
