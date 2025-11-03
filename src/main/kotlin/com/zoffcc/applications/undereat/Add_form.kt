@@ -119,14 +119,16 @@ fun add_form(context: Object?) {
                         {
                             get_address(search_item = input_name.text, onResult = {
                                 if (it.isNullOrEmpty())
-                                { // Toast.makeText(context, "No Address Found", Toast.LENGTH_SHORT).show()
+                                {
+                                    Toast.makeText(context, "No Address Found", Toast.LENGTH_SHORT).show()
                                 } else
                                 {
                                     input_addr = TextFieldValue(text = it)
                                 }
                             })
                         } else
-                        { //Toast.makeText(context, "No Name entered or Address Field is already filled out", Toast.LENGTH_SHORT).show()
+                        {
+                            Toast.makeText(context, "No Name entered or Address Field is already filled out", Toast.LENGTH_SHORT).show()
                         }
                     }, content = {
                         Text(modifier = Modifier.padding(0.dp), text = "fill address with Nominatim", style = TextStyle(
@@ -145,14 +147,16 @@ fun add_form(context: Object?) {
                         {
                             get_phonenumber(search_item = input_name.text, onResult = {
                                 if (it.isNullOrEmpty())
-                                { //Toast.makeText(context, "No Phonenumber Found", Toast.LENGTH_SHORT).show()
+                                {
+                                    Toast.makeText(context, "No Phonenumber Found", Toast.LENGTH_SHORT).show()
                                 } else
                                 {
                                     input_phonenumber = TextFieldValue(text = it)
                                 }
                             })
                         } else
-                        { //Toast.makeText(context, "No Name entered or Phonenumber is already filled out", Toast.LENGTH_SHORT).show()
+                        {
+                            Toast.makeText(context, "No Name entered or Phonenumber is already filled out", Toast.LENGTH_SHORT).show()
                         }
                     }, content = {
                         Text(modifier = Modifier.padding(0.dp), text = "fill phonenumber with Nominatim", style = TextStyle(
@@ -227,7 +231,8 @@ fun add_form(context: Object?) {
                         {
                             get_lat_lon(search_item = input_name.text, onResult = {
                                 if ((it == null) || (it.lat.isNullOrEmpty()) || (it.lon.isNullOrEmpty()))
-                                { // Toast.makeText(context, "No GPS Coordinates Found", Toast.LENGTH_SHORT).show()
+                                {
+                                    Toast.makeText(context, "No GPS Coordinates Found", Toast.LENGTH_SHORT).show()
                                 } else
                                 {
                                     input_lat = TextFieldValue(text = it.lat)
@@ -235,7 +240,8 @@ fun add_form(context: Object?) {
                                 }
                             })
                         } else
-                        { //Toast.makeText(context, "No Name entered or GPS Coordinates are already filled out", Toast.LENGTH_SHORT).show()
+                        {
+                            Toast.makeText(context, "No Name entered or GPS Coordinates are already filled out", Toast.LENGTH_SHORT).show()
                         }
                     }, content = {
                         Text(modifier = Modifier.padding(0.dp), text = "fill location with Nominatim", style = TextStyle(
