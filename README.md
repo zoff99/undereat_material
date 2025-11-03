@@ -13,8 +13,8 @@ https://nominatim.openstreetmap.org/
 <br><br>
 
 Automated screenshots:<br>
-<img src="https://github.com/zoff99/undereat_material/releases/download/nightly/screenshot-macos-15arm.png" height="220"></a>
-<img src="https://github.com/zoff99/undereat_material/releases/download/nightly/screenshot-linux.png" height="220"></a>
+<img src="https://github.com/zoff99/undereat_material/releases/download/nightly/screenshot-macos-15arm.png" height="290"></a>
+<img src="https://github.com/zoff99/undereat_material/releases/download/nightly/screenshot-linux.png" height="290"></a>
 
 <br>
 Any use of this project's code by GitHub Copilot, past or present, is done
