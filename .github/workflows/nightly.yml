@@ -512,6 +512,7 @@ jobs:
            javac jshowarch.java
            java jshowarch 885 76 165 110 15 1 &
            sleep 2
+           # audio video popup
            cliclick -m verbose c:507,368
            sleep 20
            sleep 10
