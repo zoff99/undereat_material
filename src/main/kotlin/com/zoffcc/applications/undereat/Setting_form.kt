@@ -75,7 +75,7 @@ fun settings_form(context: Object?) {
                         val dbs_path: String = import_file_name
                         import_file_name = ""
                         // val dbs_path: String = context.getExternalFilesDir(null)!!.absolutePath
-                        val sql_export_filename: String = dbs_path + "/" + export_sql_filename
+                        val sql_export_filename: String = dbs_path
                         Log.i(TAG, "import filename: " + sql_export_filename)
                         val sql_01 = "ATTACH DATABASE '$sql_export_filename' AS $sql_dump_prefix KEY '';"
                         val sql_02 = "SELECT * from $sql_dump_prefix.Restaurant;"
@@ -139,20 +139,25 @@ fun settings_form(context: Object?) {
                 // val dbs_path: String = context.getDir(sql_export_dir, MODE_PRIVATE).absolutePath
                 val dbs_path: String = System.getProperty("java.io.tmpdir")
                 // val dbs_path: String = context.getExternalFilesDir(null)!!.absolutePath
-                val sql_export_filename: String = dbs_path + "/" + export_sql_filename
+                val sql_export_filename: String = dbs_path + File.separator + export_sql_filename
                 try {
                     File(sql_export_filename).delete()
                 } catch (e: Exception) {
                     e.printStackTrace()
                 }
                 Log.i(TAG, "export filename: " + sql_export_filename)
-                val sql_01 = "ATTACH DATABASE '$sql_export_filename' AS $sql_export_db_name KEY '';"
-                val sql_02 = "SELECT sqlcipher_export('$sql_export_db_name');"
+                val sql_01 = "ATTACH DATABASE '$sql_export_filename' AS $sql_export_db_name;"
+                // val sql_02 = "SELECT sqlcipher_export('$sql_export_db_name');"
+                val sql_02 = "CREATE TABLE '$sql_export_db_name'.Restaurant AS SELECT * FROM Restaurant;"
+                val sql_02_1 = "CREATE TABLE '$sql_export_db_name'.Category AS SELECT * FROM Category;"
+                val sql_02_2 = "CREATE TABLE '$sql_export_db_name'.lov AS SELECT * FROM lov;"
                 // remove values from "lov" table, since those are kind of private settings
                 val sql_02b = "DELETE FROM '$sql_export_db_name'.lov;"
                 val sql_03 = "DETACH DATABASE $sql_export_db_name;"
                 run_query_for_single_result(sql_01)
                 run_query_for_single_result(sql_02)
+                run_query_for_single_result(sql_02_1)
+                run_query_for_single_result(sql_02_2)
                 run_query_for_single_result(sql_02b)
                 run_query_for_single_result(sql_03)
 
