@@ -18,17 +18,7 @@ else
 fi
 
 
-./tools/check_release_jni_libs.sh
-res_1=$?
-if [ $res_1 -ne 0 ]; then
-	echo "ERROR: JNI libs have some problem."
-	exit 1
-else
-	echo "JNI lib are ok."
-fi
-
 f1="build.gradle.kts"
-f2="asan_run.sh"
 
 cur_m_version=$(cat "$f1" | grep 'version = "' | head -1 | \
 	sed -e 's#^.*version = "##' | \
@@ -41,13 +31,12 @@ echo "$next_m_version"
 
 
 sed -i -e 's#version = ".*#version = "'"$next_m_version"'"#' "$f1"
-sed -i -e 's#trifa_material-linux-x64-'"$cur_m_version"'.jar#trifa_material-linux-x64-'"$next_m_version"'.jar#' "$f2"
 
 
 commit_message="new version ""$next_m_version"
 tag_name='v'"$next_m_version"
 
-git commit -m "$commit_message" "$f1" "$f2"
+git commit -m "$commit_message" "$f1"
 git tag -a "$tag_name" -m "$tag_name"
 
 
