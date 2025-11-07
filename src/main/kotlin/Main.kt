@@ -3,10 +3,16 @@
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.draganddrop.dragAndDropTarget
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -24,6 +30,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.Typography
 import androidx.compose.material.lightColors
 import androidx.compose.material.rememberScaffoldState
+import androidx.compose.material.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -37,6 +44,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draganddrop.DragAndDropEvent
+import androidx.compose.ui.draganddrop.DragAndDropTarget
+import androidx.compose.ui.draganddrop.DragData
+import androidx.compose.ui.draganddrop.dragData
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
@@ -77,6 +88,7 @@ import com.zoffcc.applications.undereat.MainScreen
 import com.zoffcc.applications.undereat.PrefsSettings
 import com.zoffcc.applications.undereat.corefuncs
 import com.zoffcc.applications.undereat.createGlobalStore
+import com.zoffcc.applications.undereat.import_db_from_file
 import com.zoffcc.applications.undereat.restore_mainlist_state
 import com.zoffcc.applications.undereat.show
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
@@ -92,8 +104,12 @@ import kotlinx.coroutines.launch
 import org.briarproject.briar.desktop.utils.InternationalizationUtils.i18n
 import java.awt.Toolkit
 import java.io.File
+import java.net.URI
+import java.nio.file.LinkOption
 import java.util.*
 import java.util.prefs.Preferences
+import kotlin.io.path.exists
+import kotlin.io.path.toPath
 
 private const val TAG = "undereat.Main.kt"
 var closing_application = false
@@ -154,12 +170,144 @@ fun App()
     scaffoldState = rememberScaffoldState()
     ScaffoldCoroutineScope = rememberCoroutineScope()
     Theme {
+        var import_file_name_main by remember { mutableStateOf("") }
+        var show_import_alert by remember { mutableStateOf(false) }
+        if (show_import_alert)
+        {
+            AlertDialog(onDismissRequest = { },
+                title = { Text("Import data") },
+                confirmButton = {
+                    Button(onClick = {
+                        val import_file_name2 = import_file_name_main
+                        import_file_name_main = ""
+                        import_db_from_file(import_file_name2)
+                        restore_mainlist_state()
+                        show_import_alert = false
+                    }) {
+                        Text("Yes")
+                    }
+                },
+                dismissButton = {
+                    Button(onClick = { show_import_alert = false }) {
+                        Text("No")
+                    }
+                },
+                text = { "Really import data ?" })
+        }
+
         Scaffold(modifier = Modifier.randomDebugBorder(), scaffoldState = scaffoldState) {
-            MainScreen()
+
+            var isDragging by remember { mutableStateOf(false) }
+            val dragAndDropTarget = remember() {
+                object: DragAndDropTarget
+                {
+                    override fun onExited(event: DragAndDropEvent)
+                    {
+                        // println("======> onExited:" + event)
+                        isDragging = false
+                    }
+
+                    override fun onEntered(event: DragAndDropEvent)
+                    {
+                        isDragging = true
+                        // println("======> onEntered:" + event)
+                    }
+
+                    override fun onChanged(event: DragAndDropEvent)
+                    {
+                        // println("======> onChanged:" + event)
+                    }
+
+                    override fun onStarted(event: DragAndDropEvent) {
+                        // println("======> onStarted:" + event + " " + event.dragData())
+                    }
+                    override fun onEnded(event: DragAndDropEvent) {
+                        isDragging = false
+                        // println("======> onEnded:" + event)
+                    }
+                    override fun onDrop(event: DragAndDropEvent): Boolean {
+                        isDragging = false
+                        // println("======> onDrop:" + event + " " + event.dragData())
+                        if (event.dragData() is DragData.FilesList)
+                        {
+                            // println("======> onDrop:" + event)
+                            val newFiles = (event.dragData() as DragData.FilesList).readFiles().mapNotNull { it1: String ->
+                                URI(it1).toPath().takeIf { it.exists(LinkOption.NOFOLLOW_LINKS) }
+                            }
+                            newFiles.forEach {
+                                if (it.toAbsolutePath().toString().isNotEmpty()) {
+                                    Log.i(TAG," " + it.toAbsolutePath().parent.toString() + " "
+                                            + it.toAbsolutePath().fileName.toString())
+                                    import_file_name_main = it.toAbsolutePath().toString()
+                                    show_import_alert = true
+                                }
+                            }
+                        }
+                        else if (event.dragData() is DragData.Image)
+                        {
+                            // println("======> onDrop:iiiii " + event + " " + (event.dragData() as DragData.Image).toString())
+                        }
+                        else if (event.dragData() is DragData.Text)
+                        {
+                            // println("======> onDrop:ttttt " + event + " " + (event.dragData() as DragData.Text).readText())
+                        }
+                        else
+                        {
+                            // println("======> onDrop:uuuuu " + event + " " + event.dragData())
+                        }
+                        isDragging = false
+                        return true
+                    }
+                }
+            }
+
+            Box(Modifier.fillMaxSize()
+                .background(color = if (isDragging) Color.LightGray else Color.Transparent)
+                .dragAndDropTarget(
+                    shouldStartDragAndDrop = { true },
+                    target = dragAndDropTarget
+                )) {
+                if (isDragging)
+                {
+                    val scope = rememberCoroutineScope()
+                    Column(modifier = Modifier.fillMaxSize()
+                        .padding(all = 10.dp)
+                        .dashedBorder(color = if (isDragging) DragAndDropColors.active else Color.Transparent,
+                            strokeWidth = if (isDragging) 5.dp else 0.dp,
+                            cornerRadiusDp = if (isDragging) 25.dp else 0.dp)) {
+                        Spacer(modifier = Modifier.weight(0.6f))
+                        DragAndDropDescription(
+                            modifier = Modifier.align(Alignment.CenterHorizontally),
+                            color = DragAndDropColors.active
+                        )
+                        Spacer(modifier = Modifier.weight(0.6f))
+                    }
+                }
+                else
+                {
+                    MainScreen()
+                }
+            }
         }
     }
     corefuncs().init_me()
     restore_mainlist_state()
+}
+
+@Composable
+fun DragAndDropDescription(modifier: Modifier, color: Color) {
+    val modifier2 = modifier.padding(vertical = 2.dp)
+    Text(
+        "Drag & drop files here",
+        fontSize = 20.sp,
+        modifier = modifier2,
+        color = color
+    )
+}
+
+object DragAndDropColors {
+    val default = Color.Gray
+    val active = Color(29, 117, 223, 255)
 }
 
 @OptIn(DelicateCoroutinesApi::class)

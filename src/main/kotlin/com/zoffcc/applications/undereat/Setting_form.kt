@@ -69,44 +69,9 @@ fun settings_form(context: Object?) {
             title = { Text("Import data") },
             confirmButton = {
                 Button(onClick = {
-                    try {
-                        // now import the db from sqlite file -------------
-                        // val dbs_path: String = context.getDir(sql_export_dir, MODE_PRIVATE).absolutePath
-                        val dbs_path: String = import_file_name
-                        import_file_name = ""
-                        // val dbs_path: String = context.getExternalFilesDir(null)!!.absolutePath
-                        val sql_export_filename: String = dbs_path
-                        Log.i(TAG, "import filename: " + sql_export_filename)
-                        val sql_01 = "ATTACH DATABASE '$sql_export_filename' AS $sql_dump_prefix KEY '';"
-                        val sql_02 = "SELECT * from $sql_dump_prefix.Restaurant;"
-                        // HINT: !!! keep these columns updated with current schema definition!!!
-                        // @formatter:off
-                        val sql_02a = "DELETE FROM Category;"
-                        val sql_02b = "INSERT INTO Category (id, name) " +
-                                "select id, name " +
-                                "from $sql_dump_prefix.Category;"
-                        //
-                        val sql_03a = "DELETE FROM Restaurant;"
-                        val sql_03b = "INSERT INTO Restaurant (id, name, category_id, address, area_code, lat, lon, rating, comment, active, for_summer, need_reservation, phonenumber, have_ac, added_timestamp, modified_timestamp, only_evening)" +
-                                " " +
-                                "select id, name, category_id, address, area_code, lat, lon, rating, comment, active, for_summer, need_reservation, phonenumber, have_ac, added_timestamp, modified_timestamp, only_evening" +
-                                " " +
-                                "from $sql_dump_prefix.Restaurant;"
-                        val sql_04 = "DETACH DATABASE $sql_dump_prefix;"
-
-                        Log.i(TAG, "share_local_file:001")
-
-                        // @formatter:on
-                        run_query_for_single_result(sql_01)
-                        run_query_for_single_result(sql_02)
-                        run_query_for_single_result(sql_02a)
-                        run_query_for_single_result(sql_02b)
-                        run_query_for_single_result(sql_03a)
-                        run_query_for_single_result(sql_03b)
-                        run_query_for_single_result(sql_04)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                    }
+                    val import_file_name2 = import_file_name
+                    import_file_name = ""
+                    import_db_from_file(import_file_name2)
                     restore_mainlist_state()
                     show_import_alert = false
                 }) {
@@ -343,6 +308,47 @@ fun settings_form(context: Object?) {
                 )
             }
         )
+    }
+}
+
+fun import_db_from_file(import_file_name: String)
+{
+    try {
+        // now import the db from sqlite file -------------
+        // val dbs_path: String = context.getDir(sql_export_dir, MODE_PRIVATE).absolutePath
+        val dbs_path: String = import_file_name
+        // val dbs_path: String = context.getExternalFilesDir(null)!!.absolutePath
+        val sql_export_filename: String = dbs_path
+        Log.i(TAG, "import filename: " + sql_export_filename)
+        val sql_01 = "ATTACH DATABASE '$sql_export_filename' AS $sql_dump_prefix KEY '';"
+        val sql_02 = "SELECT * from $sql_dump_prefix.Restaurant;"
+        // HINT: !!! keep these columns updated with current schema definition!!!
+        // @formatter:off
+        val sql_02a = "DELETE FROM Category;"
+        val sql_02b = "INSERT INTO Category (id, name) " +
+                "select id, name " +
+                "from $sql_dump_prefix.Category;"
+        //
+        val sql_03a = "DELETE FROM Restaurant;"
+        val sql_03b = "INSERT INTO Restaurant (id, name, category_id, address, area_code, lat, lon, rating, comment, active, for_summer, need_reservation, phonenumber, have_ac, added_timestamp, modified_timestamp, only_evening)" +
+                " " +
+                "select id, name, category_id, address, area_code, lat, lon, rating, comment, active, for_summer, need_reservation, phonenumber, have_ac, added_timestamp, modified_timestamp, only_evening" +
+                " " +
+                "from $sql_dump_prefix.Restaurant;"
+        val sql_04 = "DETACH DATABASE $sql_dump_prefix;"
+
+        Log.i(TAG, "share_local_file:001")
+
+        // @formatter:on
+        run_query_for_single_result(sql_01)
+        run_query_for_single_result(sql_02)
+        run_query_for_single_result(sql_02a)
+        run_query_for_single_result(sql_02b)
+        run_query_for_single_result(sql_03a)
+        run_query_for_single_result(sql_03b)
+        run_query_for_single_result(sql_04)
+    } catch (e: Exception) {
+        e.printStackTrace()
     }
 }
 
