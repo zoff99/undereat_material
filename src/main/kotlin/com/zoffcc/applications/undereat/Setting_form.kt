@@ -45,7 +45,8 @@ import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.isReadable
 
-const val export_sql_filename = "export.uedb"
+const val import_file_extension = ".uedb"
+const val export_sql_filename = "export" + import_file_extension
 const val export_ics_filename = "export.ics"
 private const val sql_dump_prefix = "import_5907edf"
 
@@ -66,7 +67,7 @@ fun settings_form(context: Object?) {
     if (show_import_alert)
     {
         AlertDialog(onDismissRequest = { },
-            title = { Text("Import data") },
+            title = { Text("Import data from file:" + "\n" + import_file_name) },
             confirmButton = {
                 Button(onClick = {
                     val import_file_name2 = import_file_name

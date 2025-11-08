@@ -33,6 +33,7 @@ import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material.AlertDialog
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -89,9 +90,11 @@ import com.zoffcc.applications.undereat.PrefsSettings
 import com.zoffcc.applications.undereat.corefuncs
 import com.zoffcc.applications.undereat.createGlobalStore
 import com.zoffcc.applications.undereat.import_db_from_file
+import com.zoffcc.applications.undereat.import_file_extension
 import com.zoffcc.applications.undereat.restore_mainlist_state
 import com.zoffcc.applications.undereat.show
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
+import com.zoffcc.applications.undereat_material.undereat_material.generated.resources.Res
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
@@ -124,6 +127,7 @@ var scaffoldState: ScaffoldState = ScaffoldState(drawerState = DrawerState(initi
 var ScaffoldCoroutineScope: CoroutineScope = GlobalScope
 var NotoEmojiFont: FontFamily? = null
 var DefaultFont: FontFamily? = null
+var startup_import_filename: String? = null
 
 val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
 
@@ -170,12 +174,12 @@ fun App()
     scaffoldState = rememberScaffoldState()
     ScaffoldCoroutineScope = rememberCoroutineScope()
     Theme {
-        var import_file_name_main by remember { mutableStateOf("") }
+        var import_file_name_main: String by remember { mutableStateOf("") }
         var show_import_alert by remember { mutableStateOf(false) }
         if (show_import_alert)
         {
             AlertDialog(onDismissRequest = { },
-                title = { Text("Import data") },
+                title = { Text("Import data from file:" + "\n" + import_file_name_main) },
                 confirmButton = {
                     Button(onClick = {
                         val import_file_name2 = import_file_name_main
@@ -286,6 +290,13 @@ fun App()
                 else
                 {
                     MainScreen()
+                    if ((startup_import_filename != null) && (startup_import_filename!!.length > import_file_extension.length))
+                    {
+                        // HINT: start import here
+                        import_file_name_main = startup_import_filename!!
+                        startup_import_filename = null
+                        show_import_alert = true
+                    }
                 }
             }
         }
@@ -325,7 +336,26 @@ fun SnackBarToast(message: String, duration_ms: Long = SNACKBAR_TOAST_MS_DURATIO
     }
 }
 
-fun main() = application(exitProcessOnExit = true) {
+fun main(args: Array<String>) = application(exitProcessOnExit = true) {
+
+    try
+    {
+        println("args START ============")
+        println("args all:" + args.size)
+        args.iterator().forEach {
+            println("args:" + it)
+            if (it.endsWith(import_file_extension)) {
+                // HINT: application was opened with an import file as arguement, so lets import it
+                startup_import_filename = it
+            }
+        }
+        println("args DONE  ============")
+    }
+    catch(e: Exception)
+    {
+        e.printStackTrace()
+    }
+
     try
     { // HINT: show proper name in MacOS Menubar
         // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
