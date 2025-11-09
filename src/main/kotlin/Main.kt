@@ -35,6 +35,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -82,6 +83,7 @@ import androidx.compose.ui.window.WindowPosition
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import ca.gosyer.appdirs.AppDirs
+import com.kdroid.composetray.utils.SingleInstanceManager
 import com.zoffcc.applications.undereat.Log
 import com.zoffcc.applications.undereat.MainActivity.Companion.DEBUG_COMPOSE_UI_UPDATES
 import com.zoffcc.applications.undereat.MainActivity.Companion.PREF__database_files_dir
@@ -130,6 +132,7 @@ var DefaultFont: FontFamily? = null
 var startup_import_filename: String? = null
 
 val globalstore = CoroutineScope(SupervisorJob()).createGlobalStore()
+
 
 @OptIn(DelicateCoroutinesApi::class, ExperimentalFoundationApi::class)
 @Composable
@@ -356,6 +359,21 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
         e.printStackTrace()
     }
 
+    // -- check for single instance --
+    // thanks to: https://github.com/kdroidFilter/ComposeNativeTray/blob/master/src/commonMain/kotlin/com/kdroid/composetray/utils/SingleInstanceManager.kt
+    //
+    val isSingleInstance = SingleInstanceManager.isSingleInstance(
+        onRestoreRequest = {
+            // indicate that our main windows needs to be shown (if minimized now)
+            globalstore.updateMinimized(false)
+        }
+    )
+    if (!isSingleInstance) {
+        exitApplication()
+        return@application
+    }
+    // -- check for single instance --
+
     try
     { // HINT: show proper name in MacOS Menubar
         // https://alvinalexander.com/java/java-application-name-mac-menu-bar-menubar-class-name/
@@ -393,7 +411,6 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
 private fun MainAppStart()
 {
     globalstore.setDefaultDensity(LocalDensity.current.density)
-
     globalstore.loadUiDensity()
     val appIcon = painterResource("icon-linux.png")
 
@@ -439,6 +456,7 @@ private fun MainAppStart()
         } catch (_: java.lang.Exception)
         {
         }
+
         Window(onCloseRequest = { isAskingToClose = true },
             title = "Undereat - " + win_title_addon,
             icon = appIcon, state = state,
@@ -507,6 +525,13 @@ private fun MainAppStart()
                 LocalDensity provides Density(globalstore.state.ui_density)
             )
             {
+                val globalstore__ by globalstore.stateFlow.collectAsState()
+                if (!globalstore__.mainwindow_minimized)
+                {
+                    // un-minimize main window when someone tried to open another instance of this app
+                    state.isMinimized = false
+                    globalstore.updateMinimized(false)
+                }
                 App()
             }
         }
