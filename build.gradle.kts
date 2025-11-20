@@ -89,7 +89,7 @@ dependencies {
     //
     implementation("org.xerial:sqlite-jdbc:3.51.0.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
-    implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
+    implementation("ca.gosyer:kotlin-multiplatform-appdirs:2.0.0")
     implementation("com.google.code.gson:gson:2.13.2")
     implementation("io.github.vinceglb:filekit-core:0.12.0")
     //implementation("io.github.vinceglb:filekit-dialogs:0.12.0")
