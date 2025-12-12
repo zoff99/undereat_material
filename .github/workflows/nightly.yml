@@ -84,12 +84,12 @@ jobs:
           cp -v ./build/compose/binaries/main*/deb/undereat-material_*_amd64.deb undereat-material_nightly.deb
           cp -v ./build/compose/binaries/main*/rpm/undereat_material-*.x86_64.rpm undereat-material_nightly.rpm
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly.deb
           path: undereat-material_nightly.deb
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly.rpm
           path: undereat-material_nightly.rpm
@@ -177,7 +177,7 @@ jobs:
         run: |
           cp -v ./undereat*material*AppImage undereat-material_nightly-x86_64.appimage
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly-x86_64.appimage
           path: undereat-material_nightly-x86_64.appimage
@@ -254,7 +254,7 @@ jobs:
         run: |
           cp -v /Users/runner/work/undereat_material/undereat_material/build/compose/binaries/main*/dmg/undereat_material-*.dmg undereat-material_nightly.dmg
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly.dmg
           path: undereat-material_nightly.dmg
@@ -323,13 +323,13 @@ jobs:
           cp -v ./build/compose/binaries/main*/exe/undereat_material-*.exe undereat-material_nightly.exe
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly.msi
           path: undereat-material_nightly.msi
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: undereat-material_nightly.exe
           path: undereat-material_nightly.exe
@@ -535,7 +535,7 @@ jobs:
            cp -v dst2.png screenshot-macos-15arm.png
 
     - name: upload-screenshots
-      uses: actions/upload-artifact@v5
+      uses: actions/upload-artifact@v6
       with:
         name: screenshot-macos-15
         path: |
@@ -686,13 +686,13 @@ jobs:
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux.png
 
         - name: upload-screenshots
-          uses: actions/upload-artifact@v5
+          uses: actions/upload-artifact@v6
           with:
             name: screenshot-linux_before_wm
             path: /tmp/screenshot-linux_before_wm.png
