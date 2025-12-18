@@ -394,7 +394,7 @@ fun main(args: Array<String>) = application(exitProcessOnExit = true) {
         var awtAppClassNameField: java.lang.reflect.Field? = null
         awtAppClassNameField = xToolkit.javaClass.getDeclaredField("awtAppClassName")
         awtAppClassNameField.isAccessible = true
-        awtAppClassNameField[xToolkit] = "normal_undereat_material" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
+        awtAppClassNameField[xToolkit] = "UndereatMainKt" // this needs to be exactly the same String as "StartupWMClass" in the "*.desktop" file
     } catch (e: Exception)
     { // e.printStackTrace()
     }

@@ -97,7 +97,7 @@ dependencies {
     // implementation("io.github.vinceglb:filekit-coil:0.12.0")
 }
 
-val main_class_name = "MainKt"
+val main_class_name = "UndereatMainKt"
 
 compose.desktop {
     java {

@@ -1,7 +1,7 @@
 [Desktop Entry]
 Name=Undereat Material
 GenericName=Restaurant List
-StartupWMClass=normal_undereat_material
+StartupWMClass=UndereatMainKt
 Comment=Undereat
 Exec=undereat_material/bin/undereat_material %U
 Icon=undereat_material
