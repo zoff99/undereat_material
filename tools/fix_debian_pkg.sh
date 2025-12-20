@@ -32,7 +32,7 @@ if [ -e 'control.tar.xz' ] ; then
     tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm
 else
     rm -f control.tar.zst
-    tar --use-compress-program=unzstd --owner 0 --group 0 -cvf control.tar.zst control postinst postrm preinst prerm
+    tar --use-compress-program=zstd --owner 0 --group 0 -cvf control.tar.zst control postinst postrm preinst prerm
 fi
 
 rm -f control postinst postrm preinst prerm
@@ -79,8 +79,10 @@ tar -tvf ../data.tar | grep '\.desktop'
 echo "checking ... DONE"
 
 if [ -e '../data.tar.xz' ] ; then
+    rm -f ../data.tar.xz
     xz --compress ../data.tar
 else
+    rm -f ../data.tar.zst
     zstd ../data.tar
 fi
 
