@@ -78,7 +78,7 @@ echo "checking ..."
 tar -tvf ../data.tar | grep '\.desktop'
 echo "checking ... DONE"
 
-if [ -e '../data.tar.xz' ] ; then
+if [ -e '../data.tar' ] ; then
     rm -f ../data.tar.xz
     xz --compress ../data.tar || exit 1
 else
