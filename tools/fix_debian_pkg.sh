@@ -13,7 +13,10 @@ mkdir -p "$workdir"
 cp -av "$debfile" "$workdir"
 
 cd "$workdir" || exit 1
+
+ls -al
 ar -x "$debfile"
+ls -al
 
 tar -xvf control.tar.xz
 
