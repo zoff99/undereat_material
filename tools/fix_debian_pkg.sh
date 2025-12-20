@@ -65,8 +65,8 @@ cat "$desktop_file"
 sed -i -e 's#Exec=/opt/undereat-material/bin/undereat_material#Exec=/opt/undereat-material/bin/undereat_material %U#' "$desktop_file"
 sed -i -e 's#Comment=.*$#Comment=Undereat#' "$desktop_file"
 sed -i -e 's#Name=.*$#Name=Undereat Material#' "$desktop_file"
-sed -i -e 's#MimeType=.*$#MimeType=application/x-undereat-db#' "$desktop_file"
-sed -i -e 's#Categories=.*$#Categories=Utility#' "$desktop_file"
+sed -i -e 's#MimeType=.*$#MimeType=application/x-undereat-db;#' "$desktop_file"
+sed -i -e 's#Categories=.*$#Categories=Utility;#' "$desktop_file"
 
 echo 'StartupWMClass=UndereatMainKt' >> "$desktop_file"
 
