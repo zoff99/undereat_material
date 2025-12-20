@@ -18,21 +18,33 @@ ls -al
 ar -x "$debfile"
 ls -al
 
-# --use-compress-program=unzstd if fileending is tar.zst
-
-tar -xvf control.tar.xz
+if [ -e 'control.tar.xz' ] ; then
+    tar -xvf control.tar.xz
+else
+    tar --use-compress-program=unzstd -xvf control.tar.zst
+fi
 
 sed -i -e 's#^xdg-desktop-menu.*$#'"$postinst_cmd1"'\n'"$postinst_cmd2"'#g' postinst
 sed -i -e 's#^xdg-desktop-menu.*$#'"$prerm_cmd1"'\n'"$prerm_cmd2"'#g' prerm
 
-rm -f control.tar.xz
-tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm
+if [ -e 'control.tar.xz' ] ; then
+    rm -f control.tar.xz
+    tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm
+else
+    rm -f control.tar.zst
+    tar --use-compress-program=unzstd --owner 0 --group 0 -cvf control.tar.zst control postinst postrm preinst prerm
+fi
 
 rm -f control postinst postrm preinst prerm
 
 mkdir -p d_/
 cd d_/ || exit 1
-tar -xvf ../data.tar.xz
+
+if [ -e '../data.tar.xz' ] ; then
+    tar -xvf ../data.tar.xz
+else
+    tar --use-compress-program=unzstd -xvf ../data.tar.zst
+fi
 
 desktop_file="./opt/undereat-material/lib/undereat-material-undereat_material.desktop"
 
@@ -48,7 +60,11 @@ echo 'StartupWMClass=UndereatMainKt' >> "$desktop_file"
 
 cat "$desktop_file"
 
-xz --decompress ../data.tar.xz
+if [ -e '../data.tar.xz' ] ; then
+    xz --decompress ../data.tar.xz
+else
+    unzstd ../data.tar.zst
+fi
 
 tar --delete -vf ../data.tar "$desktop_file"
 
@@ -62,13 +78,22 @@ echo "checking ..."
 tar -tvf ../data.tar | grep '\.desktop'
 echo "checking ... DONE"
 
-xz --compress ../data.tar
+if [ -e '../data.tar.xz' ] ; then
+    xz --compress ../data.tar
+else
+    zstd ../data.tar
+fi
 
 ls -al ../
 
 cd ../ && rm -Rf d_/
 
-ar rc final_pkg.deb debian-binary control.tar.xz data.tar.xz
+if [ -e 'data.tar.xz' ] ; then
+    ar rc final_pkg.deb debian-binary control.tar.xz data.tar.xz
+else
+    ar rc final_pkg.deb debian-binary control.tar.zst data.tar.zst
+fi
+
 cp -av final_pkg.deb ../ || exit 1
 
 cd ../ && rm -Rf "$workdir"
