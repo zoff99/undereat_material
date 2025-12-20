@@ -32,8 +32,12 @@ else
     tar --use-compress-program=unzstd -xvf control.tar.zst || exit 1
 fi
 
+# postinst
 sed -i -e 's#^xdg-desktop-menu.*$#'"$postinst_cmd1"'\n'"$postinst_cmd2"'#g' postinst
+# prerm
 sed -i -e 's#^xdg-desktop-menu.*$#'"$prerm_cmd1"'\n'"$prerm_cmd2"'#g' prerm
+# control
+sed -i -e 's#^Depends: .*$#Depends: libc6, libfontconfig1, libfreetype6, xdg-utils, zlib1g#g' control
 
 if [ "$use_xz" == "1" ] ; then
     rm -f control.tar.xz
