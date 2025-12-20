@@ -33,7 +33,7 @@ jobs:
 
   build-linux-nightly-artifact:
     name: Nightly Artifact Linux Build
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-22.04
     needs: [update-nightly-tag]
     if: |
       always() &&
