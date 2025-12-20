@@ -33,7 +33,7 @@ jobs:
 
   build-linux-nightly-artifact:
     name: Nightly Artifact Linux Build
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     needs: [update-nightly-tag]
     if: |
       always() &&
@@ -51,6 +51,7 @@ jobs:
           apt-get install -y --no-install-recommends \
           ca-certificates \
           rpm \
+          zstd \
           openjdk-17-jdk \
           openjdk-17-jdk-headless
 

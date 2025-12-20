@@ -18,6 +18,8 @@ ls -al
 ar -x "$debfile"
 ls -al
 
+# --use-compress-program=unzstd if fileending is tar.zst
+
 tar -xvf control.tar.xz
 
 sed -i -e 's#^xdg-desktop-menu.*$#'"$postinst_cmd1"'\n'"$postinst_cmd2"'#g' postinst
