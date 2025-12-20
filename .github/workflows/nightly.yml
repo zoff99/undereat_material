@@ -77,7 +77,7 @@ jobs:
       - name: fix deb
         run: |
           id;pwd;ls -hal ./build/compose/binaries/main*/deb/undereat-material_*-1_amd64.deb
-          deb_pkg_name=$(ls -1 /build/compose/binaries/main*/deb/undereat-material_*-1_amd64.deb | tail -1 2>/dev/null)
+          deb_pkg_name=$(ls -1 ./build/compose/binaries/main*/deb/undereat-material_*-1_amd64.deb | tail -1 2>/dev/null)
           tools/fix_debian_pkg.sh "$deb_pkg_name"
           find . -name '*.deb'
           ls -hal ./final_pkg.deb
