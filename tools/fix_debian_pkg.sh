@@ -18,7 +18,15 @@ ls -al
 ar -x "$debfile"
 ls -al
 
+use_xz=0
 if [ -e 'control.tar.xz' ] ; then
+    use_xz=1
+    echo "using compression: XZ"
+else
+    echo "using compression: ZSTD"
+fi
+
+if [ "$use_xz" == "1" ] ; then
     tar -xvf control.tar.xz || exit 1
 else
     tar --use-compress-program=unzstd -xvf control.tar.zst || exit 1
@@ -27,7 +35,7 @@ fi
 sed -i -e 's#^xdg-desktop-menu.*$#'"$postinst_cmd1"'\n'"$postinst_cmd2"'#g' postinst
 sed -i -e 's#^xdg-desktop-menu.*$#'"$prerm_cmd1"'\n'"$prerm_cmd2"'#g' prerm
 
-if [ -e 'control.tar.xz' ] ; then
+if [ "$use_xz" == "1" ] ; then
     rm -f control.tar.xz
     tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm || exit 1
 else
@@ -40,7 +48,7 @@ rm -f control postinst postrm preinst prerm
 mkdir -p d_/
 cd d_/ || exit 1
 
-if [ -e '../data.tar.xz' ] ; then
+if [ "$use_xz" == "1" ] ; then
     tar -xvf ../data.tar.xz || exit 1
 else
     tar --use-compress-program=unzstd -xvf ../data.tar.zst || exit 1
@@ -60,7 +68,7 @@ echo 'StartupWMClass=UndereatMainKt' >> "$desktop_file"
 
 cat "$desktop_file"
 
-if [ -e '../data.tar.xz' ] ; then
+if [ "$use_xz" == "1" ] ; then
     xz --decompress ../data.tar.xz || exit 1
 else
     unzstd ../data.tar.zst || exit 1
@@ -78,7 +86,7 @@ echo "checking ..."
 tar -tvf ../data.tar | grep '\.desktop'
 echo "checking ... DONE"
 
-if [ -e '../data.tar' ] ; then
+if [ "$use_xz" == "1" ] ; then
     rm -f ../data.tar.xz
     xz --compress ../data.tar || exit 1
 else
@@ -86,11 +94,13 @@ else
     zstd ../data.tar || exit 1
 fi
 
+echo "checking ..."
 ls -al ../
+echo "checking ... DONE"
 
 cd ../ && rm -Rf d_/
 
-if [ -e 'data.tar.xz' ] ; then
+if [ "$use_xz" == "1" ] ; then
     ar rc final_pkg.deb debian-binary control.tar.xz data.tar.xz || exit 1
 else
     ar rc final_pkg.deb debian-binary control.tar.zst data.tar.zst || exit 1
