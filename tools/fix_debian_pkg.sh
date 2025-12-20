@@ -19,9 +19,9 @@ ar -x "$debfile"
 ls -al
 
 if [ -e 'control.tar.xz' ] ; then
-    tar -xvf control.tar.xz
+    tar -xvf control.tar.xz || exit 1
 else
-    tar --use-compress-program=unzstd -xvf control.tar.zst
+    tar --use-compress-program=unzstd -xvf control.tar.zst || exit 1
 fi
 
 sed -i -e 's#^xdg-desktop-menu.*$#'"$postinst_cmd1"'\n'"$postinst_cmd2"'#g' postinst
@@ -29,10 +29,10 @@ sed -i -e 's#^xdg-desktop-menu.*$#'"$prerm_cmd1"'\n'"$prerm_cmd2"'#g' prerm
 
 if [ -e 'control.tar.xz' ] ; then
     rm -f control.tar.xz
-    tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm
+    tar --owner 0 --group 0 -cJvf control.tar.xz control postinst postrm preinst prerm || exit 1
 else
     rm -f control.tar.zst
-    tar --use-compress-program=zstd --owner 0 --group 0 -cvf control.tar.zst control postinst postrm preinst prerm
+    tar --use-compress-program=zstd --owner 0 --group 0 -cvf control.tar.zst control postinst postrm preinst prerm || exit 1
 fi
 
 rm -f control postinst postrm preinst prerm
@@ -41,9 +41,9 @@ mkdir -p d_/
 cd d_/ || exit 1
 
 if [ -e '../data.tar.xz' ] ; then
-    tar -xvf ../data.tar.xz
+    tar -xvf ../data.tar.xz || exit 1
 else
-    tar --use-compress-program=unzstd -xvf ../data.tar.zst
+    tar --use-compress-program=unzstd -xvf ../data.tar.zst || exit 1
 fi
 
 desktop_file="./opt/undereat-material/lib/undereat-material-undereat_material.desktop"
@@ -61,18 +61,18 @@ echo 'StartupWMClass=UndereatMainKt' >> "$desktop_file"
 cat "$desktop_file"
 
 if [ -e '../data.tar.xz' ] ; then
-    xz --decompress ../data.tar.xz
+    xz --decompress ../data.tar.xz || exit 1
 else
-    unzstd ../data.tar.zst
+    unzstd ../data.tar.zst || exit 1
 fi
 
-tar --delete -vf ../data.tar "$desktop_file"
+tar --delete -vf ../data.tar "$desktop_file" || exit 1
 
 echo "checking ..."
 tar -tvf ../data.tar | grep '\.desktop'
 echo "checking ... DONE"
 
-tar --owner 0 --group 0 -rvf ../data.tar "$desktop_file"
+tar --owner 0 --group 0 -rvf ../data.tar "$desktop_file" || exit 1
 
 echo "checking ..."
 tar -tvf ../data.tar | grep '\.desktop'
@@ -80,10 +80,10 @@ echo "checking ... DONE"
 
 if [ -e '../data.tar.xz' ] ; then
     rm -f ../data.tar.xz
-    xz --compress ../data.tar
+    xz --compress ../data.tar || exit 1
 else
     rm -f ../data.tar.zst
-    zstd ../data.tar
+    zstd ../data.tar || exit 1
 fi
 
 ls -al ../
@@ -91,9 +91,9 @@ ls -al ../
 cd ../ && rm -Rf d_/
 
 if [ -e 'data.tar.xz' ] ; then
-    ar rc final_pkg.deb debian-binary control.tar.xz data.tar.xz
+    ar rc final_pkg.deb debian-binary control.tar.xz data.tar.xz || exit 1
 else
-    ar rc final_pkg.deb debian-binary control.tar.zst data.tar.zst
+    ar rc final_pkg.deb debian-binary control.tar.zst data.tar.zst || exit 1
 fi
 
 cp -av final_pkg.deb ../ || exit 1
