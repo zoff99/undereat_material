@@ -57,6 +57,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -67,12 +68,13 @@ import globalstore
 import kotlinx.coroutines.flow.collectLatest
 import randomDebugBorder
 import java.net.URLEncoder
+import java.text.Normalizer
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
 
 @Composable
-fun RestaurantCard(index: Int, data: Restaurant, context: Object?) {
+fun RestaurantCard(index: Int, data: Restaurant, context: Object?, input_filter: TextFieldValue) {
     val state_compactMainlist by globalstore.stateFlow.collectAsState()
     Box(
         modifier = Modifier
@@ -105,7 +107,7 @@ fun RestaurantCard(index: Int, data: Restaurant, context: Object?) {
         ) {
             Column(modifier = Modifier.weight(100000F)) {
                 val compact = state_compactMainlist.compactMainList
-                restaurant_name_view(data, compact)
+                restaurant_name_view(data, compact, input_filter)
                 var cat_name: String
                 try {
                     cat_name =  global_categories[data.category_id]!!
@@ -389,7 +391,7 @@ private fun have_ac_label(data: Restaurant, compact: Boolean) {
 }
 
 @Composable
-internal fun restaurant_name_view(data: Restaurant, compact: Boolean) {
+internal fun restaurant_name_view(data: Restaurant, compact: Boolean, input_filter: TextFieldValue) {
     var text_size_compact = 19.sp
     if (data.name.length > 32) {
         text_size_compact = 14.sp
@@ -418,6 +420,20 @@ internal fun restaurant_name_view(data: Restaurant, compact: Boolean) {
             fontSize = if (compact) text_size_compact else 20.sp,
         )
     )
+
+    if ((!input_filter.text.isNullOrEmpty()) &&
+        (data.comment.lowercase().replace("\\p{Zs}+".toRegex(), "").unaccent()
+            .contains(input_filter.text.lowercase().unaccent()))
+        )
+    {
+        Spacer(modifier = Modifier.width(1.dp).height(4.dp))
+        Text(text = data.comment,
+            softWrap = true,
+            modifier = Modifier.randomDebugBorder().padding(start = 6.dp),
+            textAlign = TextAlign.Start,
+            style = TextStyle(fontSize = if (compact) 12.sp else 14.sp))
+        Spacer(modifier = Modifier.width(1.dp).height(4.dp))
+    }
 }
 
 @Composable

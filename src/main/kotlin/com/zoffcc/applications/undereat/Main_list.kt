@@ -600,7 +600,7 @@ fun main_list(restaurants: StateRestaurantList) {
                 verticalArrangement = Arrangement.spacedBy(0.dp),
             ) {
                 items(items = restaurants.restaurantlist, key = { item -> item.id }, contentType = { item -> item::class }) { data ->
-                    RestaurantCard(-999, data, null)
+                    RestaurantCard(-999, data, null, input_filter)
                 }
             }
             VerticalScrollbar(adapter = rememberScrollbarAdapter(listState),
