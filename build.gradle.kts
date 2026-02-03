@@ -12,7 +12,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.compose")
     id("com.github.gmazzo.buildconfig") version "6.0.7"
     id("org.ajoberstar.grgit") version "5.3.3"
-    id("de.undercouch.download") version "5.6.0"
+    id("de.undercouch.download") version "5.7.0"
 }
 
 group = "com.zoffcc.applications.undereat_material"
