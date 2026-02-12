@@ -16,7 +16,7 @@ plugins {
 }
 
 group = "com.zoffcc.applications.undereat_material"
-version = "1.0.4"
+version = "1.0.5"
 val appName = "undereat_material"
 
 repositories {
