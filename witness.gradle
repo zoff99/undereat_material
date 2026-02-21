@@ -154,8 +154,6 @@ dependencyVerification {
         'org.jetbrains.kotlinx:kotlinx-serialization-core-jvm:1.9.0:kotlinx-serialization-core-jvm-1.9.0.jar:1f0afa172110e45a7231ef1b44ae8fd84c1ebaff96f3fc3ad68ef8c48120b59c',
         'org.jetbrains.runtime:jbr-api:1.5.0:jbr-api-1.5.0.jar:657ede7d7f8e175c909b23caa10fcd4d4a511304fd938aa9cc8457b4378950d5',
         'org.jetbrains.runtime:jbr-api:1.9.0:jbr-api-1.9.0.jar:7e37284e33b5b304ee6174dcaa92db949b257cc4c8991ca865e7daf5113d8279',
-        'org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.144.3:skiko-awt-runtime-linux-x64-0.144.3.jar:fb34ae724074812720f9233621426251ee206c1d33cf99dc0025bae725c5cb7e',
-        'org.jetbrains.skiko:skiko-awt-runtime-linux-x64:0.9.37.3:skiko-awt-runtime-linux-x64-0.9.37.3.jar:c88132224eb94a67d5e41b807ead0301b5cba8eab41d5226badd7cac37e43821',
         'org.jetbrains.skiko:skiko-awt:0.144.3:skiko-awt-0.144.3.jar:43821623e1768c8145e1fd54f73bcab0ab3cf3ca1e3a3d3130de0278bb768966',
         'org.jetbrains.skiko:skiko-awt:0.9.37.3:skiko-awt-0.9.37.3.jar:cdfe998711c8f0fa84f21745ebcfe6d840d307c4ceea7f0dda3158be2bb2193d',
         'org.jetbrains:annotations:13.0:annotations-13.0.jar:ace2a10dc8e2d5fd34925ecac03e4988b2c0f851650c94b8cef49ba1bd111478',

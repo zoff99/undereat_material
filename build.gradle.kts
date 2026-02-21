@@ -261,5 +261,8 @@ tasks {
     }
 }
 
+// HINT: enable the witness checker
+project.extensions.extraProperties["noChecksumWitness"] = "org.jetbrains.skiko:skiko-awt-runtime-linux"
+
 apply(from = "gradle_witness_ng_desktop.gradle")
 

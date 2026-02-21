@@ -209,6 +209,13 @@ project.task('calculateChecksums').doLast {
     dependencies.each {dep ->
         // HINT: exclude deps that change for different architcures
         if ((!dep.key.all.startsWith("and:sdk:platforms:android.jar")) && ((!dep.key.all.startsWith("and:sdk:platforms:core-for-system-modules.jar")))) {
+            def excludedProp = project.properties.get('noChecksumWitness')
+            def excluded = excludedProp == null ? [] : excludedProp.split(',')
+            def containsExcluded = excluded.any { dep.key.all.contains(it) }
+            if (containsExcluded) {
+                println "Skipping excluded Checksum configuration ${dep.key.all}"
+                return
+            }
             witnessFile.append("        '${dep.key.all}:${dep.value}'," + "\n")
         }
     }
