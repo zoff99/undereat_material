@@ -260,3 +260,6 @@ tasks {
         commandLine(appImageTool, linuxAppDir, "$appName-${project.version}-x86_64.AppImage")
     }
 }
+
+apply(from = "gradle_witness_ng_desktop.gradle")
+
