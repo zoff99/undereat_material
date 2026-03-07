@@ -36,11 +36,6 @@ import com.zoffcc.applications.sorm.OrmaDatabase
 import com.zoffcc.applications.sorm.OrmaDatabase.run_query_for_single_result
 import com.zoffcc.applications.undereat_material.undereat_material.BuildConfig
 import globalstore
-import io.github.vinceglb.filekit.FileKit
-import io.github.vinceglb.filekit.absolutePath
-import io.github.vinceglb.filekit.dialogs.compose.rememberFilePickerLauncher
-import io.github.vinceglb.filekit.dialogs.openFilePicker
-import io.github.vinceglb.filekit.path
 import java.io.File
 import kotlin.io.path.Path
 import kotlin.io.path.isReadable
@@ -164,25 +159,6 @@ fun settings_form(context: Object?) {
             }
         )
         Spacer(modifier = Modifier.height(50.dp))
-        val launcher = rememberFilePickerLauncher { file ->
-            Log.i(TAG, "selected file for import: " + file)
-            if (file != null)
-            {
-                if (Path(file.absolutePath()).isReadable())
-                {
-                    import_file_name = file.absolutePath()
-                    show_import_alert = true
-                }
-                else
-                {
-                    Toast.makeText(null, "Import File is not readable", Toast.LENGTH_SHORT).show()
-                }
-            }
-            else
-            {
-                Toast.makeText(null, "Import File is null", Toast.LENGTH_SHORT).show()
-            }
-        }
         Button(
             modifier = Modifier
                 .height(50.dp)
@@ -191,7 +167,25 @@ fun settings_form(context: Object?) {
             elevation = ButtonDefaults.buttonElevation(4.dp),
             onClick = {
                 // show_import_alert = true
-                launcher.launch()
+                // launcher.launch()
+                val file: File = File("/tmp/xy")
+                Log.i(TAG, "selected file for import: " + file)
+                if (file != null)
+                {
+                    if (Path(file.absolutePath).isReadable())
+                    {
+                        import_file_name = file.absolutePath
+                        show_import_alert = true
+                    }
+                    else
+                    {
+                        Toast.makeText(null, "Import File is not readable", Toast.LENGTH_SHORT).show()
+                    }
+                }
+                else
+                {
+                    Toast.makeText(null, "Import File is null", Toast.LENGTH_SHORT).show()
+                }
             },
             content = {
                 Text(
