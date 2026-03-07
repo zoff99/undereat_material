@@ -662,6 +662,12 @@ jobs:
                printf 'xdotool mousemove --sync 1000 400 click 1\n' >> /tmp/a.sh
                printf 'sleep 90\n' >> /tmp/a.sh
                printf 'import -window root /tmp/screenshot-linux.png\n' >> /tmp/a.sh
+               printf 'sleep 2\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 200 90 click 1\n' >> /tmp/a.sh
+               printf 'sleep 1\n' >> /tmp/a.sh
+               printf 'xdotool mousemove --sync 1000 400 click 1\n' >> /tmp/a.sh
+               printf 'sleep 1\n' >> /tmp/a.sh
+               printf 'import -window root /tmp/screenshot-linux_02.png\n' >> /tmp/a.sh
                cat /tmp/a.sh
                chmod a+rx /tmp/a.sh
 
@@ -697,12 +703,19 @@ jobs:
                echo "++++++++++++++++++"
                echo "++++++++++++++++++"
                cp -av /tmp/screenshot-linux.png screenshot-linux.png
+               cp -av /tmp/screenshot-linux_02.png screenshot-linux_02.png
 
         - name: upload-screenshots
           uses: actions/upload-artifact@v7
           with:
             name: screenshot-linux
             path: /tmp/screenshot-linux.png
+
+        - name: upload-screenshots_02
+          uses: actions/upload-artifact@v7
+          with:
+            name: screenshot-linux_02
+            path: /tmp/screenshot-linux_02.png
 
         - name: upload-screenshots
           uses: actions/upload-artifact@v7
@@ -721,7 +734,7 @@ jobs:
             prerelease: true
             replacesArtifacts: true
             token: ${{ secrets.GITHUB_TOKEN }}
-            artifacts: "screenshot-linux.png"
+            artifacts: "screenshot-linux.png,screenshot-linux_02.png"
 
 
 
