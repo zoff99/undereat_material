@@ -19,7 +19,7 @@ dependencyVerification {
         'androidx.savedstate:savedstate-compose-desktop:1.3.3:savedstate-compose-desktop-1.3.3.jar:4a94787a6e5bcfe143390a4f2737d4425d2ea867f2b34a847de6cda3c6ccc58a',
         'androidx.savedstate:savedstate-desktop:1.3.3:savedstate-desktop-1.3.3.jar:c5c89062ba8402b8f8657efd54db1ff192f91ca95fae59c3b418fbc477c3e3ea',
         'ca.gosyer:kotlin-multiplatform-appdirs-jvm:1.2.0:Kotlin-Multiplatform-AppDirs-jvm-1.1.0.jar:419fad1e8e50b785885933e67f5024ec88e3757cfc473ea6570c5054d6d2a251',
-        'com.github.gmazzo.buildconfig:plugin:6.0.7:plugin-6.0.7.jar:52852346174bb9ecb5720298b0dfb44dfb9555bd84f49d138979800bd2b22695',
+        'com.github.gmazzo.buildconfig:plugin:6.0.9:plugin-6.0.9.jar:5bc7e3dc1b460f441563c02b1c6c7c49c804ef1d72979db960d30dd3b1445bc6',
         'com.github.hypfvieh:dbus-java-core:5.2.0:dbus-java-core-5.2.0.jar:9dfadd65bdfec2154ccf23039f9ae6239dc625735b933653d9403e11c2c9cf10',
         'com.github.hypfvieh:dbus-java-transport-native-unixsocket:5.2.0:dbus-java-transport-native-unixsocket-5.2.0.jar:efeb82fecd6e176e5e9f63fb6d6775f19c194584bf001fd579a1a5b560bbf061',
         'com.google.code.gson:gson:2.11.0:gson-2.11.0.jar:57928d6e5a6edeb2abd3770a8f95ba44dce45f3b23b7a9dc2b309c581552a78b',
