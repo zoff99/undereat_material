@@ -150,6 +150,6 @@ dependencyVerification {
         'org.ow2.asm:asm-tree:9.9:asm-tree-9.9.jar:42178f3775c9c63f9e5e1446747d29b4eca4d91bd6e75e5c43cfa372a47d38c6',
         'org.ow2.asm:asm:9.9:asm-9.9.jar:03d99a74ad1ee5c71334ef67437f4ef4fe3488caa7c96d8645abc73c8e2017d4',
         'org.slf4j:slf4j-api:1.7.36:slf4j-api-1.7.36.jar:d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0',
-        'org.xerial:sqlite-jdbc:3.51.2.0:sqlite-jdbc-3.51.2.0.jar:5454be00f3a04b4d67ef6179121aa900a904da53b9cbffea742d548d737f0ebc',
+        'org.xerial:sqlite-jdbc:3.51.3.0:sqlite-jdbc-3.51.3.0.jar:3684ac5e9bd893cbe68eb0ac1708343f66be829b1d2b5ab317e783d05acd5aef',
     ]
 }
