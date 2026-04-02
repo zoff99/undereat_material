@@ -4,6 +4,7 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import de.undercouch.gradle.tasks.download.Download
 import org.ajoberstar.grgit.Grgit
 import java.time.format.DateTimeFormatter
+import org.gradle.internal.os.OperatingSystem
 
 plugins {
     kotlin("jvm")
@@ -18,6 +19,32 @@ plugins {
 group = "com.zoffcc.applications.undereat_material"
 version = "1.0.6"
 val appName = "undereat_material"
+
+val build_with_appimage = false
+
+var os: OperatingSystem? = null
+var os_arch: String? = null
+var os_java_home: String? = null
+var os_java_runtime_version: String? = null
+var os_java_vm_version: String? = null
+
+try
+{
+    os = OperatingSystem.current()
+    os_arch = System.getProperty("os.arch")
+    os_java_home = System.getProperty("java.home")
+    os_java_runtime_version = System.getProperty("java.runtime.version")
+    os_java_vm_version = System.getProperty("java.vm.version")
+
+    System.err.println("*** Building on ${os!!.familyName} / ${os!!.name} / ${os!!.version} / ${System.getProperty("os.arch")}.")
+    System.err.println("*** os_java_home: $os_java_home.")
+    System.err.println("*** os_java_runtime_version: $os_java_runtime_version.")
+    System.err.println("*** os_java_vm_version: $os_java_vm_version.")
+}
+catch(_: Exception)
+{
+    System.err.println("some Error detecting OS for Java")
+}
 
 repositories {
     flatDir {
@@ -118,6 +145,20 @@ compose.desktop {
         jvmArgs += listOf("-Dcom.apple.mrj.application.apple.menu.about.name=Undereat")
         jvmArgs += listOf("-Dapple.awt.application.name=Undereat")
 
+        try
+        {
+            if (os!!.isLinux)
+            {
+                // on Linux set this for a possible skiko bug fix
+                println("Linux -> skiko bug fix")
+                jvmArgs += listOf("-Dskiko.vsync.enabled=false")
+            }
+        }
+        catch(_: Exception)
+        {
+            println("error detecting OS -> for skiko bug fix")
+        }
+
         buildTypes.release.proguard {
             optimize.set(false)
             obfuscate.set(false)
@@ -135,12 +176,24 @@ compose.desktop {
             println("licenseFile=" + project.file("LICENSE"))
             appResourcesRootDir.set(project.layout.projectDirectory.dir("resources"))
 
-            targetFormats(
-                TargetFormat.Msi, TargetFormat.Exe,
-                TargetFormat.Dmg,
-                TargetFormat.Deb, TargetFormat.Rpm
-            )
-            // TargetFormat.AppImage
+            if (build_with_appimage)
+            {
+                System.err.println("#### build with AppImage ####")
+                targetFormats(
+                    TargetFormat.Msi, TargetFormat.Exe,
+                    TargetFormat.Dmg,
+                    TargetFormat.Deb, TargetFormat.Rpm, TargetFormat.AppImage
+                )
+            }
+            else
+            {
+                System.err.println("==== build without AppImage ====")
+                targetFormats(
+                    TargetFormat.Msi, TargetFormat.Exe,
+                    TargetFormat.Dmg,
+                    TargetFormat.Deb, TargetFormat.Rpm
+                )
+            }
 
             nativeDistributions {
                 modules("java.instrument", "java.net.http", "java.prefs", "java.sql", "jdk.unsupported", "jdk.security.auth")
