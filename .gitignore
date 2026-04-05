@@ -12,3 +12,4 @@ main.db-journal
 undereat_material-*.AppImage
 .kotlin/
 normal_run.sh
+final_pkg.deb
