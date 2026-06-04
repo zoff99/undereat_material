@@ -114,7 +114,7 @@ dependencies {
     implementation(compose.materialIconsExtended)
     //
     //
-    implementation("org.xerial:sqlite-jdbc:3.53.1.0")
+    implementation("org.xerial:sqlite-jdbc:3.53.2.0")
     implementation("com.squareup.okhttp3:okhttp:5.3.2")
     implementation("ca.gosyer:kotlin-multiplatform-appdirs:1.2.0")
     implementation("com.google.code.gson:gson:2.14.0")
