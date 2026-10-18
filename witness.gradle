@@ -28,8 +28,8 @@ dependencyVerification {
         'com.google.errorprone:error_prone_annotations:2.27.0:error_prone_annotations-2.27.0.jar:24c923372c58e35d0b9f16a028929bb9aedc77521867c274f2bd0735df5ba1f5',
         'com.google.errorprone:error_prone_annotations:2.48.0:error_prone_annotations-2.48.0.jar:b49c5c958316ed67a09c699dda9aa749caf434d51d863dea599ef36a49b9c855',
         'com.googlecode.javaewah:JavaEWAH:1.2.3:JavaEWAH-1.2.3.jar:d65226949713c4c61a784f41c51167e7b0316f93764398ebba9e4336b3d954c2',
-        'com.squareup.okhttp3:okhttp-jvm:5.4.0:okhttp-jvm-5.4.0.jar:b15e605ca0a4b12c62ea7f657dad413c236c947e875854767349cdbe20df473c',
-        'com.squareup.okio:okio-jvm:3.17.0:okio-jvm-3.17.0.jar:3b13dcc3e1573047c2d507fc4f7fcb0bb0cbcd9d395da21d20e09406e2cd6a73',
+        'com.squareup.okhttp3:okhttp-jvm:5.5.0:okhttp-jvm-5.5.0.jar:234194a04aac54858df0a750d243af7b2e39df5e4eb86e9912043ad33a9f9a52',
+        'com.squareup.okio:okio-jvm:3.18.1:okio-jvm-3.18.1.jar:b97b640557a650d15411f2be29aef558c4e422a83653cb18ba494311dbed18be',
         'com.squareup:javapoet:1.13.0:javapoet-1.13.0.jar:4c7517e848a71b36d069d12bb3bf46a70fd4cda3105d822b0ed2e19c00b69291',
         'com.squareup:kotlinpoet-jvm:2.2.0:kotlinpoet-jvm-2.2.0.jar:87ba83576e2bbda929e2d4d83035eaf7984b9adc0798837b8e8d1eb4953a17da',
         'commons-codec:commons-codec:1.17.0:commons-codec-1.17.0.jar:f700de80ac270d0344fdea7468201d8b9c805e5c648331c3619f2ee067ccfc59',
@@ -154,6 +154,6 @@ dependencyVerification {
         'org.ow2.asm:asm-tree:9.9.1:asm-tree-9.9.1.jar:0f3555096b720b820bbacab0b515589bee0200bee099bda14c561738ae837ba1',
         'org.ow2.asm:asm:9.9.1:asm-9.9.1.jar:6f3828a215c920059a5efa2fb55c233d6c54ec5cadca99ce1b1bdd10077c7ddd',
         'org.slf4j:slf4j-api:1.7.36:slf4j-api-1.7.36.jar:d3ef575e3e4979678dc01bf1dcce51021493b4d11fb7f1be8ad982877c16a1c0',
-        'org.xerial:sqlite-jdbc:3.53.2.1:sqlite-jdbc-3.53.2.1.jar:f55e405ed96d5ffe629e05b7b51b059e1c7d64527c0cc90a972fbac06730ccc1',
+        'org.xerial:sqlite-jdbc:3.53.4.0:sqlite-jdbc-3.53.4.0.jar:bcb1f51e36f940867e83342f9efbf5968ac44a6bef4d397bb4af7b17b45cd2fb',
     ]
 }
